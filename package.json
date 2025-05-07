@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run test:mocha && npm run test:tap",
     "test:mocha": "mocha --exit --require ts-node/register test/*.ts",
-    "test:tap": "tap test/tap/*.tap.ts",
+    "test:tap": "tap --disable-coverage test/tap/*.tap.ts",
     "mocha": "mocha --require ts-node/register",
     "tap": "tap",
     "debug": "node --nolazy --debug-brk=5858 ",
