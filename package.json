@@ -13,7 +13,8 @@
     "mocha": "mocha --require ts-node/register",
     "tap": "tap",
     "debug": "node --nolazy --debug-brk=5858 ",
-    "compile": "tsc"
+    "compile": "tsc",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -49,6 +50,7 @@
     "superagent": "^10.2.1",
     "tap": "^21.1.0",
     "typescript": "^5.5.4",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "eslint": "^9.26.0"
   }
 }
