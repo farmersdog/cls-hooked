@@ -1,6 +1,6 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
   "main": "index.js",
   "files": [
