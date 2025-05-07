@@ -1,5 +1,10 @@
 # `cls-hooked` Changelog
 
+
+## v4.5.0
+
+* chore: Update repo reources so this can be re-published as a public module
+
 ## v4.4.0
 
 * fix: Null contexts when destorying namespace to avoid memory leak - Thanks @alexgarbarev!
