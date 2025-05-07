@@ -1,7 +1,7 @@
 {
   "name": "@farmersdog/cls-hooked",
   "version": "4.4.0",
-  "description": "CLS using AsyncWrap instead of async-listener - Node >= 4.7.0",
+  "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
   "main": "index.js",
   "files": [
     "index.js",
@@ -16,19 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jeff-lewis/cls-hooked.git"
+    "url": "https://github.com/farmersdog/cls-hooked.git"
   },
   "keywords": [
     "threading",
     "shared",
     "context"
   ],
-  "author": "Forrest L Norvell <ogd@aoaioxxysz.net>",
-  "contributors": [
-    "Tim Caswell <tim@creationix.com>",
-    "Forrest L Norvell <ogd@aoaioxxysz.net>",
-    "Jeff Lewis <jlewis@streetconnect.com>"
-  ],
+  "author": "The Farmer's Dog Engineering",
   "license": "BSD-2-Clause",
   "engineStrict": false,
   "engines": {
