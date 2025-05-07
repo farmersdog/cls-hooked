@@ -382,6 +382,7 @@ test("event emitters bound to CLS context", function (t) {
     let Timer: any;
     try {
       Timer = (process as any).binding('timer_wrap')?.Timer;
+     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       Timer = null;
     }

@@ -2,7 +2,6 @@
 
 import * as tap from 'tap';
 import { EventEmitter } from 'events';
-import * as util from 'util';
 import cls from '../../index';
 
 const test = tap.test;

@@ -51,7 +51,7 @@ test("asynchronous state propagation", function (t) {
   t.test("b. async transaction with setInterval", function (t) {
     t.plan(4);
 
-    const namespace = fresh('b')
+    const namespace = fresh('b');
     let count = 0;
     let handle: NodeJS.Timeout;
 

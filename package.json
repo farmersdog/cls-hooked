@@ -32,25 +32,26 @@
     "node": "^18.0 || ^20.0 || >=22.0"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
     "emitter-listener": "^1.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.15.14",
-    "@types/mocha": "^10.0.10",
-    "@types/sinon": "^17.0.4",
     "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.14",
+    "@types/sinon": "^17.0.4",
     "@types/sinon-chai": "^4.0.0",
     "@types/superagent": "^8.1.9",
     "@types/tap": "^15.0.11",
     "chai": "^5.2.0",
+    "eslint": "^9.26.0",
     "mocha": "^11.2.2",
     "semver": "^6.3.0",
     "sinon": "^20.0.0",
     "sinon-chai": "^4.0.0",
     "superagent": "^10.2.1",
     "tap": "^21.1.0",
-    "typescript": "^5.5.4",
     "ts-node": "^10.9.2",
-    "eslint": "^9.26.0"
+    "typescript": "^5.5.4"
   }
 }

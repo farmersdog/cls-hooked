@@ -72,6 +72,7 @@ test("synchronous throw checks if error exists", function (t) {
         throw null;
       });
     }
+     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     catch (e) {
       // as we had a null error, cls couldn't set the new inner value
       t.equal(namespace.get('value'), 'transaction clear', 'from outer value');

@@ -22,7 +22,7 @@ test("namespace management", function (t) {
 
   t.equal(Object.keys(process.namespaces).length, 0, "namespaces have been reset");
 
-  const anotherNamespace = cls.createNamespace('another');
+  cls.createNamespace('another');
   t.ok(process.namespaces.another, "namespace is available from global");
 
   t.doesNotThrow(function () {

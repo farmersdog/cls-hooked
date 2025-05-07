@@ -758,6 +758,7 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
 
         let watcherClosed = false;
         const watcher = fs.watch(FILENAME, {persistent: false},
+           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           function (eventType: string, filename: string | null) {
             if (watcherClosed) return;
             watcherClosed = true;
