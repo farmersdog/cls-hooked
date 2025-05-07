@@ -23,6 +23,7 @@ describe('cls with net connection 2', function() {
 
         server.on('connection', function OnServerConnection(socket) {
             expect(namespace.get(keyName)).to.equal(TEST_VALUE, 'state has been mutated');
+            namespace.bindEmitter(socket);
 
             socket.on('data', function OnServerSocketData(data) {
               const dataString = data.toString('utf-8');
@@ -44,6 +45,8 @@ describe('cls with net connection 2', function() {
               const port = (server.address() as net.AddressInfo).port;
               const client = net.connect({ port }, function OnClientConnect() {
                 expect(namespace.get(keyName)).to.equal(TEST_VALUE2, 'state preserved for client connection');
+                namespace.bindEmitter(client);
+
                 client.on('data', function OnClientSocketData(data) {
                   const dataString = data.toString('utf-8');
                   expect(dataString).to.equal(DATUM2, 'should get DATUM1');

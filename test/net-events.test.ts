@@ -27,6 +27,7 @@ describe('cls with net connection', () => {
 
         server = net.createServer((socket) => {
           //namespace.bindEmitter(socket);
+          namespace.bindEmitter(socket);
 
           testValue1 = namespace.get('test');
 
@@ -47,6 +48,7 @@ describe('cls with net connection', () => {
 
             const client = net.connect({ port: address.port }, () => {
               //namespace.bindEmitter(client);
+              namespace.bindEmitter(client);
               testValue3 = namespace.get('test');
               client.write('Hello');
 
