@@ -1,5 +1,31 @@
 # `cls-hooked` Changelog
 
+
+## v4.5.0
+
+* chore: Update repo reources so this can be re-published as a public module
+
+## v4.4.0
+
+* fix: Null contexts when destorying namespace to avoid memory leak - Thanks @alexgarbarev!
+* chore: scope forked package under @farmersdog npm namesepace
+
+## v4.3.0
+
+* chore: update dependenices
+
+## v4.2.2
+
+* bump async-hook-jl version for babel support
+
+## v4.2.1
+
+* chore(release): v4.2.1 - Issue #9, PR #10 - Reduce Memory Leaks - Thanks @JohnCMcDonough!
+
+## v4.2.0
+
+* feat(compat): v4.2 for node v4.7-v8
+
 ## v4.1.7
 
 * fix: npm engine semver to allow node 6.10.x.
@@ -36,12 +62,12 @@
 
 ## v4.1.0
 
-* feat: add `runAndReturn` method to get return value of `func` (from [@overlookmotel](https://github.com/overlookmotel/node-continuation-local-storage)). 
+* feat: add `runAndReturn` method to get return value of `func` (from [@overlookmotel](https://github.com/overlookmotel/node-continuation-local-storage)).
 
 
 ## v4.0.1
 
-* feat: Same API but major change to implementation. Uses **unofficial** [AsyncWrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md) instead of [async-listener](https://github.com/othiym23/async-listener). 
+* feat: Same API but major change to implementation. Uses **unofficial** [AsyncWrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md) instead of [async-listener](https://github.com/othiym23/async-listener).
 
 
 ### v3.1.0 (2014-07-28):
@@ -50,11 +76,11 @@
 
 ### v3.0.0 (2013-12-14):
 
-* Removed the notion of a "default" or "global" context per namespace. 
+* Removed the notion of a "default" or "global" context per namespace.
   It only existed to create a simpler interface for developing and testing the module,
-  and created the potential for nasty information disclosure bugs 
+  and created the potential for nasty information disclosure bugs
   (see [issue #14](https://github.com/othiym23/node-continuation-local-storage/issues/14)
-  for details). This is potentially a breaking change, if you're depending on the global context, 
+  for details). This is potentially a breaking change, if you're depending on the global context,
   so semver says we have to bump the major version.
 * Added this changelog.
 
@@ -64,7 +90,7 @@
 
 ### v2.6.1 (2013-11-29):
 
-* `emitter-listener` has been extracted from `shimmer` into a standalone module 
+* `emitter-listener` has been extracted from `shimmer` into a standalone module
   for `namespace.bindEmitter()`.
 
 ### v2.6.0 (2013-11-27):

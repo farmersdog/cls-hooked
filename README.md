@@ -1,25 +1,10 @@
-[![NPM](https://nodei.co/npm/cls-hooked.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/cls-hooked/)
-
-[![Build Status](https://travis-ci.org/Jeff-Lewis/cls-hooked.svg?branch=master)](https://travis-ci.org/Jeff-Lewis/cls-hooked)
-
 # Continuation-Local Storage ( Hooked )
 
-### This is a fork of [CLS](https://github.com/othiym23/node-continuation-local-storage) using [AsyncWrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md) OR [async_hooks](https://github.com/nodejs/node/blob/master/doc/api/async_hooks.md) instead of [async-listener](https://github.com/othiym23/async-listener).
+This is a maintained fork of the [Jeff-Lewis/cls-hooked](https://github.com/Jeff-Lewis/cls-hooked) package. The
+public API will be left unchanged so this can continue to be used by any
+package that depends on the continuation-local-stroage implementation.
 
-### When running Nodejs version < 8, this module uses [AsyncWrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md) which is an unsupported Nodejs API, so please consider the risk before using it.
-
-### When running Nodejs version >= 8.2.1, this module uses the newer [async_hooks](https://github.com/nodejs/node/blob/master/doc/api/async_hooks.md) API which is considered `Experimental` by Nodejs. 
-
-### Thanks to [@trevnorris](https://github.com/trevnorris) for [AsyncWrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md), [async_hooks](https://github.com/nodejs/node/blob/master/doc/api/async_hooks.md) and all the async work in Node and [@AndreasMadsen](https://github.com/AndreasMadsen) for [async-hook](https://github.com/AndreasMadsen/async-hook)
-
-### A little history of "AsyncWrap/async_hooks" and its incarnations
-
-1. First implementation was called **[AsyncListener](https://github.com/nodejs/node-v0.x-archive/pull/6011)** in node v0.11 but was [removed from core](https://github.com/nodejs/node-v0.x-archive/pull/8110) prior to Nodejs v0.12
-2. Second implementation called **[AsyncWrap, async-wrap or async_wrap](https://github.com/nodejs/node-eps/blob/async-wrap-ep/XXX-asyncwrap-api.md)** was included to Nodejs v0.12.
-    - `AsyncWrap` is unofficial and undocumented but is currently in Nodejs versions 6 & 7
-    - `cls-hooked` uses `AsyncWrap` when run in Node < 8.
-3. Third implementation and [offically Node-eps accepted](https://github.com/nodejs/node-eps/blob/master/006-asynchooks-api.md) **AsyncHooks ([async_hooks](https://github.com/nodejs/node/blob/master/doc/api/async_hooks.md)) API** was included in Nodejs v8. :) 
-**The latest version of `cls-hooked` uses [async_hooks](https://github.com/nodejs/node/blob/master/doc/api/async_hooks.md) API when run in Node >= 8.2.1**
+## Usage
 
 ---
 Continuation-local storage works like thread-local storage in threaded
@@ -274,20 +259,6 @@ setInterval(function () {
 
 A context is a plain object created using the enclosing context as its prototype.
 
-# copyright & license
+## copyright & license
 
 See [LICENSE](https://github.com/jeff-lewis/cls-hooked/blob/master/LICENSE)
-for the details of the BSD 2-clause "simplified" license used by
-`continuation-local-storage`. This package was developed in 2012-2013 (and is
-maintained now) by Forrest L Norvell, [@othiym23](https://github.com/othiym23),
-with considerable help from Timothy Caswell,
-[@creationix](https://github.com/creationix), working for The Node Firm. This
-work was underwritten by New Relic for use in their Node.js instrumentation
-agent, so maybe give that a look if you have some Node.js
-performance-monitoring needs.
-
-[timer functions]: https://nodejs.org/api/timers.html
-[setImmediate]:    https://nodejs.org/api/timers.html#timers_setimmediate_callback_arg
-[setTimeout]:      https://nodejs.org/api/timers.html#timers_settimeout_callback_delay_arg
-[setInterval]:     https://nodejs.org/api/timers.html#timers_setinterval_callback_delay_arg
-[cps]:             http://en.wikipedia.org/wiki/Continuation-passing_style
