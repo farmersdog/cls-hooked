@@ -1,6 +1,6 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "4.5.0",
+  "version": "5.0.0-alpha.1",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
   "main": "dist/index.js",
   "files": [
@@ -28,10 +28,9 @@
   "license": "BSD-2-Clause",
   "engineStrict": false,
   "engines": {
-    "node": "^4.7 || >=6.9 || >=7.3 || >=8.2.1"
+    "node": "^18.0 || ^20.0 || >=22.0"
   },
   "dependencies": {
-    "async-hook-jl": "^1.7.6",
     "emitter-listener": "^1.0.1"
   },
   "devDependencies": {
