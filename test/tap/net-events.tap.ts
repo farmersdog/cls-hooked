@@ -1,17 +1,19 @@
 'use strict';
 
-var net = require('net');
-var test = require('tap').test;
-var createNamespace = require('../../index').createNamespace;
+import * as net from 'net';
+import * as tap from 'tap';
+import cls from '../../index';
+
+const test = tap.test;
 
 test('continuation-local state with net connection', function(t) {
   t.plan(4);
 
-  var namespace = createNamespace('net');
+  const namespace = cls.createNamespace('net');
   namespace.run(function() {
     namespace.set('test', 'originalValue');
 
-    var server;
+    let server: net.Server;
     namespace.run(function() {
       namespace.set('test', 'newContextValue');
 
@@ -24,10 +26,10 @@ test('continuation-local state with net connection', function(t) {
         });
       });
       server.listen(function() {
-        var address = server.address();
+        const address = server.address() as net.AddressInfo;
         namespace.run(function() {
           namespace.set('test', 'MONKEY');
-          var client = net.connect(address.port, function() {
+          const client = net.connect(address.port, 'localhost', function() {
             t.equal(namespace.get('test'), 'MONKEY', 'state preserved for client connection');
             client.write('Hello');
             client.on('data', function() {

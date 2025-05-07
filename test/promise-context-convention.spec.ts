@@ -1,18 +1,17 @@
 'use strict';
 
-require('mocha');
-const chai = require('chai');
-const should = chai.should();
+import 'mocha';
+import * as chai from 'chai';
+import cls from '../index';
 
-const context = require('../index.js');
+const should = chai.should();
 
 /**
  * See https://github.com/othiym23/node-continuation-local-storage/issues/64
  */
 describe('Promise context convention', () => {
-
-  let promise;
-  let ns = context.createNamespace('PromiseConventionNS');
+  let promise: Promise<void>;
+  let ns = cls.createNamespace('PromiseConventionNS');
   let conventionId = 0;
 
   before((done) => {
@@ -34,11 +33,9 @@ describe('Promise context convention', () => {
         done();
       });
     });
-
   });
 
   it('convention should be 3', () => {
     should.equal(conventionId, 3);
   });
-
 });

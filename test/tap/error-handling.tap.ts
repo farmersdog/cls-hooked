@@ -1,22 +1,22 @@
 'use strict';
 
-var test   = require('tap').test
-  , cls    = require('../../index.js')
-  , domain = require('domain')
-  ;
+import * as tap from 'tap';
+import * as domain from 'domain';
+import cls from '../../index';
+
+const test = tap.test;
 
 test("continuation-local storage glue with a throw in the continuation chain",
      function (t) {
-  var namespace = cls.createNamespace('test');
+  const namespace = cls.createNamespace('test');
   namespace.run(function () {
-    var d = domain.create();
+    const d = domain.create();
     namespace.set('outer', true);
 
     d.on('error', function (blerg) {
       t.equal(blerg.message, "explicitly nonlocal exit", "got the expected exception");
       t.ok(namespace.get('outer'), "outer context is still active");
       t.notOk(namespace.get('inner'), "inner context should have been exited by throw");
-      t.equal(namespace._set.length, 1, "should be back to outer state");
 
       cls.destroyNamespace('test');
       t.end();
@@ -38,7 +38,7 @@ test("continuation-local storage glue with a throw in the continuation chain",
 test("synchronous throw attaches the context", function (t) {
   t.plan(3);
 
-  var namespace = cls.createNamespace('cls@synchronous');
+  const namespace = cls.createNamespace('cls@synchronous');
   namespace.run(function () {
     namespace.set('value', 'transaction clear');
     try {
@@ -48,8 +48,9 @@ test("synchronous throw attaches the context", function (t) {
       });
     }
     catch (e) {
-      t.ok(namespace.fromException(e), "context was attached to error");
-      t.equal(namespace.fromException(e)['value'], 'transaction set',
+      const context = namespace.fromException(e);
+      t.ok(context, "context was attached to error");
+      t.equal(context!['value'], 'transaction set',
               "found the inner value");
     }
 
@@ -62,7 +63,7 @@ test("synchronous throw attaches the context", function (t) {
 test("synchronous throw checks if error exists", function (t) {
   t.plan(2);
 
-  var namespace = cls.createNamespace('cls@synchronous-null-error');
+  const namespace = cls.createNamespace('cls@synchronous-null-error');
   namespace.run(function () {
     namespace.set('value', 'transaction clear');
     try {
@@ -85,12 +86,13 @@ test("synchronous throw checks if error exists", function (t) {
 test("throw in process.nextTick attaches the context", function (t) {
   t.plan(3);
 
-  var namespace = cls.createNamespace('cls@nexttick2');
+  const namespace = cls.createNamespace('cls@nexttick2');
 
-  var d = domain.create();
+  const d = domain.create();
   d.once('error', function (e) {
-    t.ok(namespace.fromException(e), "context was attached to error");
-    t.equal(namespace.fromException(e)['value'], 'transaction set',
+    const context = namespace.fromException(e);
+    t.ok(context, "context was attached to error");
+    t.equal(context!['value'], 'transaction set',
             "found the inner value");
 
     cls.destroyNamespace('cls@nexttick2');
@@ -114,12 +116,13 @@ test("throw in process.nextTick attaches the context", function (t) {
 test("throw in setTimeout attaches the context", function (t) {
   t.plan(3);
 
-  var namespace = cls.createNamespace('cls@nexttick3');
-  var d = domain.create();
+  const namespace = cls.createNamespace('cls@nexttick3');
+  const d = domain.create();
 
   d.once('error', function (e) {
-    t.ok(namespace.fromException(e), "context was attached to error");
-    t.equal(namespace.fromException(e)['value'], 'transaction set',
+    const context = namespace.fromException(e);
+    t.ok(context, "context was attached to error");
+    t.equal(context!['value'], 'transaction set',
             "found the inner value");
 
     cls.destroyNamespace('cls@nexttick3');

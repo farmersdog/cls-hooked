@@ -1,33 +1,35 @@
 'use strict';
 
 // stdlib
-var tap = require('tap');
-var test = tap.test;
-var EventEmitter = require('events').EventEmitter;
+import * as tap from 'tap';
+import { EventEmitter } from 'events';
+import cls from '../../index';
 
-// module under test
-var context = require('../../index.js');
+const test = tap.test;
 
 // multiple contexts in use
-var tracer = context.createNamespace('tracer');
+const tracer = cls.createNamespace('tracer');
 
+interface Transaction {
+  status: string;
+}
 
 test("simple tracer built on contexts", function (t) {
   t.plan(7);
 
-  var harvester = new EventEmitter();
+  const harvester = new EventEmitter();
 
-  harvester.on('finished', function (transaction) {
+  harvester.on('finished', function (transaction: Transaction) {
     t.ok(transaction, "transaction should have been passed in");
     t.equal(transaction.status, 'ok', "transaction should have finished OK");
     t.equal(Object.keys(process.namespaces).length, 1, "Should only have one namespace.");
   });
 
-  var returnValue = {};
+  const returnValue = {};
 
-  var returnedValue = tracer.runAndReturn(function(context) {
+  const returnedValue = tracer.runAndReturn(function(context) {
     t.ok(tracer.active, "tracer should have an active context");
-    tracer.set('transaction', {status : 'ok'});
+    tracer.set('transaction', {status: 'ok'});
     t.ok(tracer.get('transaction'), "can retrieve newly-set value");
     t.equal(tracer.get('transaction').status, 'ok', "value should be correct");
 

@@ -1,9 +1,11 @@
 'use strict';
 
-var test = require('tap').test;
-var EventEmitter = require('events').EventEmitter;
-var cls = require('../../index.js');
-const util = require('util');
+import * as tap from 'tap';
+import { EventEmitter } from 'events';
+import * as util from 'util';
+import cls from '../../index';
+
+const test = tap.test;
 
 test("event emitters bound to CLS context", function(t) {
   t.plan(1);
@@ -11,9 +13,9 @@ test("event emitters bound to CLS context", function(t) {
   t.test("emitter bound to multiple namespaces handles them correctly", function(t) {
     t.plan(6);
 
-    var ee = new EventEmitter();
-    var ns1 = cls.createNamespace('1');
-    var ns2 = cls.createNamespace('2');
+    const ee = new EventEmitter();
+    const ns1 = cls.createNamespace('1');
+    const ns2 = cls.createNamespace('2');
 
     // emulate an incoming data emitter
     setTimeout(function() {

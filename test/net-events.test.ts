@@ -1,28 +1,27 @@
 'use strict';
 
-require('mocha');
-const chai = require('chai');
+import 'mocha';
+import * as chai from 'chai';
+import * as net from 'net';
+import cls from '../index';
+
 const should = chai.should();
-const net = require('net');
-const cls = require('../index.js');
 
 describe('cls with net connection', () => {
-
-  let namespace = cls.createNamespace('net');
-  let testValue1;
-  let testValue2;
-  let testValue3;
-  let testValue4;
+  const namespace = cls.createNamespace('net');
+  let testValue1: string;
+  let testValue2: string;
+  let testValue3: string;
+  let testValue4: string;
 
   before(function(done) {
-
     let serverDone = false;
     let clientDone = false;
 
     namespace.run(() => {
       namespace.set('test', 'originalValue');
 
-      let server;
+      let server: net.Server;
       namespace.run(() => {
         namespace.set('test', 'newContextValue');
 
@@ -39,15 +38,14 @@ describe('cls with net connection', () => {
             serverDone = true;
             checkDone();
           });
-
         });
 
         server.listen(() => {
-          const address = server.address();
+          const address = server.address() as net.AddressInfo;
           namespace.run(() => {
             namespace.set('test', 'MONKEY');
 
-            const client = net.connect(address.port, () => {
+            const client = net.connect({ port: address.port }, () => {
               //namespace.bindEmitter(client);
               testValue3 = namespace.get('test');
               client.write('Hello');
@@ -57,7 +55,6 @@ describe('cls with net connection', () => {
                 clientDone = true;
                 checkDone();
               });
-
             });
           });
         });
@@ -69,27 +66,25 @@ describe('cls with net connection', () => {
         done();
       }
     }
-
   });
 
   it('value newContextValue', () => {
     should.exist(testValue1);
-    testValue1.should.equal('newContextValue');
+    should.equal(testValue1, 'newContextValue');
   });
 
   it('value newContextValue 2', () => {
     should.exist(testValue2);
-    testValue2.should.equal('newContextValue');
+    should.equal(testValue2, 'newContextValue');
   });
 
   it('value MONKEY', () => {
     should.exist(testValue3);
-    testValue3.should.equal('MONKEY');
+    should.equal(testValue3, 'MONKEY');
   });
 
   it('value MONKEY 2', () => {
     should.exist(testValue4);
-    testValue4.should.equal('MONKEY');
+    should.equal(testValue4, 'MONKEY');
   });
-
 });

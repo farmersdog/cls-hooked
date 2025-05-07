@@ -1,9 +1,10 @@
 'use strict';
 
-const chai = require('chai');
-const should = chai.should();
+import * as chai from 'chai';
+import cls from '../index';
+import type { CLSNamespace } from '../cls-async-storage';
 
-const context = require('../index.js');
+const should = chai.should();
 
 chai.config.includeStack = true;
 
@@ -11,13 +12,14 @@ describe('cls namespace management', () => {
 
   it('name is required', () => {
     should.Throw(() => {
-      context.createNamespace();
+      // @ts-expect-error - This should throw
+      cls.createNamespace();
     });
   });
 
-  let namespaceTest;
+  let namespaceTest: CLSNamespace;
   before(() => {
-    namespaceTest = context.createNamespace('test');
+    namespaceTest = cls.createNamespace('test');
   });
 
   it('namespace is returned upon creation', () => {
@@ -25,28 +27,28 @@ describe('cls namespace management', () => {
   });
 
   it('namespace lookup works', () => {
-    should.exist(context.getNamespace('test'));
-    context.getNamespace('test').should.be.equal(namespaceTest);
+    should.exist(cls.getNamespace('test'));
+    should.equal(cls.getNamespace('test'), namespaceTest);
   });
 
   it('allows resetting namespaces', () => {
     should.not.Throw(() => {
-      context.reset();
+      cls.reset();
     });
   });
 
   it('namespaces have been reset', () => {
-    Object.keys(process.namespaces).length.should.equal(0);
+    should.equal(Object.keys(process.namespaces).length, 0);
   });
 
   it('namespace is available from global', () => {
-    context.createNamespace('another');
+    cls.createNamespace('another');
     should.exist(process.namespaces.another);
   });
 
   it('destroying works', () => {
     should.not.Throw(() => {
-      context.destroyNamespace('another');
+      cls.destroyNamespace('another');
     });
   });
 

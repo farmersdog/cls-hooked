@@ -1,42 +1,35 @@
 'use strict';
 
-require('mocha');
-const chai = require('chai');
-const util = require('util');
-chai.should();
+import 'mocha';
+import * as chai from 'chai';
+import * as util from 'util';
+import cls from '../index';
 
-const cls = require('../index.js');
+const should = chai.should();
 
 describe('multiple namespaces handles them correctly', () => {
+  let test1Val: string;
+  let test2Val: string;
+  let test3Val: string;
+  let test4Val: string;
 
-  let test1Val;
-  let test2Val;
-  let test3Val;
-  let test4Val;
-
-  let ns1 = cls.createNamespace('ONE');
-  let ns2 = cls.createNamespace('TWO');
-
+  const ns1 = cls.createNamespace('ONE');
+  const ns2 = cls.createNamespace('TWO');
 
   before((done) => {
-
     ns1.run(() => {
       ns2.run(() => {
-
         ns1.set('name', 'tom1');
         ns2.set('name', 'paul2');
 
         setTimeout(() => {
-
           ns1.run(() => {
-
             process.nextTick(() => {
-
               test1Val = ns1.get('name');
-              process._rawDebug(util.inspect(ns1), true);
+              console.debug(util.inspect(ns1), true);
 
               test2Val = ns2.get('name');
-              process._rawDebug(util.inspect(ns2), true);
+              console.debug(util.inspect(ns2), true);
 
               ns1.set('name', 'bob');
               ns2.set('name', 'alice');
@@ -46,33 +39,27 @@ describe('multiple namespaces handles them correctly', () => {
                 test4Val = ns2.get('name');
                 done();
               });
-
             });
-
           });
-
         });
-
       });
     });
-
   });
 
   it('name tom1', () => {
-    test1Val.should.equal('tom1');
+    should.equal(test1Val, 'tom1');
   });
 
   it('name paul2', () => {
-    test2Val.should.equal('paul2');
+    should.equal(test2Val, 'paul2');
   });
 
   it('name bob', () => {
-    test3Val.should.equal('bob');
+    should.equal(test3Val, 'bob');
   });
 
   it('name alice', () => {
-    test4Val.should.equal('alice');
+    should.equal(test4Val, 'alice');
   });
-
 });
 

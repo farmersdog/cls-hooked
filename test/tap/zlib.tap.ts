@@ -1,22 +1,22 @@
 'use strict';
 
-const tap = require('tap');
-const test = tap.test;
-const createNamespace = require('../../index.js').createNamespace;
+import * as tap from 'tap';
+import * as zlib from 'zlib';
+import cls from '../../index';
 
-const zlib = require('zlib');
+const test = tap.test;
 
 test("continuation-local state with zlib", function (t) {
   t.plan(1);
 
-  var namespace = createNamespace('namespace');
+  const namespace = cls.createNamespace('namespace');
   namespace.run(function () {
     namespace.set('test', 0xabad1dea);
 
     t.test("deflate", function (t) {
       namespace.run(function () {
         namespace.set('test', 42);
-        zlib.deflate(new Buffer("Goodbye World"), function (err) {
+        zlib.deflate(Buffer.from("Goodbye World"), function (err) {
           if (err) throw err;
           t.equal(namespace.get('test'), 42, "mutated state was preserved");
           t.end();

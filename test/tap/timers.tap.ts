@@ -1,13 +1,14 @@
 'use strict';
 
-const tap = require('tap');
+import * as tap from 'tap';
+import cls from '../../index';
+
 const test = tap.test;
-const createNamespace = require('../../index.js').createNamespace;
 
 test("continuation-local state with timers", function (t) {
   t.plan(4);
 
-  var namespace = createNamespace('namespace');
+  const namespace = cls.createNamespace('namespace');
   namespace.run(function () {
     namespace.set('test', 0xabad1dea);
 
@@ -62,7 +63,7 @@ test("continuation-local state with timers", function (t) {
         t.equal(namespace.get('test'), 10101,
                 "continuation-local state has been mutated");
 
-        var ref = setInterval(function () {
+        const ref = setInterval(function () {
           t.equal(namespace.get('test'), 10101,
                   "mutated state has persisted to setInterval's callback");
 
