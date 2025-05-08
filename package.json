@@ -1,18 +1,20 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "4.5.0",
+  "version": "5.0.0-alpha.1",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
-  "main": "index.js",
+  "main": "dist/index.js",
   "files": [
-    "index.js",
-    "context.js",
-    "context-legacy.js"
+    "dist/"
   ],
   "scripts": {
-    "test": "mocha test/*.js & tap test/tap/*.tap.js",
-    "test-mocha": "mocha test/*.js",
-    "test-tap": "tap test/tap/*.tap.js",
-    "debug": "node --nolazy --debug-brk=5858 "
+    "test": "npm run test:mocha && npm run test:tap",
+    "test:mocha": "mocha --exit --require ts-node/register test/*.ts",
+    "test:tap": "tap --disable-coverage test/tap/*.tap.ts",
+    "mocha": "mocha --require ts-node/register",
+    "tap": "tap",
+    "debug": "node --nolazy --debug-brk=5858 ",
+    "compile": "tsc",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -27,19 +29,29 @@
   "license": "BSD-2-Clause",
   "engineStrict": false,
   "engines": {
-    "node": "^4.7 || >=6.9 || >=7.3 || >=8.2.1"
+    "node": "^18.0 || ^20.0 || >=22.0"
   },
   "dependencies": {
-    "async-hook-jl": "^1.7.6",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
     "emitter-listener": "^1.0.1"
   },
   "devDependencies": {
-    "chai": "^4.1.0",
-    "mocha": "^6.2.2",
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.14",
+    "@types/sinon": "^17.0.4",
+    "@types/sinon-chai": "^4.0.0",
+    "@types/superagent": "^8.1.9",
+    "@types/tap": "^15.0.11",
+    "chai": "^5.2.0",
+    "eslint": "^9.26.0",
+    "mocha": "^11.2.2",
     "semver": "^6.3.0",
-    "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0",
-    "superagent": "^5.1.2",
-    "tap": "^10.7.3"
+    "sinon": "^20.0.0",
+    "sinon-chai": "^4.0.0",
+    "superagent": "^10.2.1",
+    "tap": "^21.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   }
 }
