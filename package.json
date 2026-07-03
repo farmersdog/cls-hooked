@@ -1,6 +1,6 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "5.0.0-alpha.2",
+  "version": "5.0.0-alpha.3",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
   "keywords": [
     "context",
