@@ -1,9 +1,5 @@
 "use strict";
 
-// exit() must restore the ALS store observed at the matching enter(), not
-// the sync-stack value. ALS.run() skips frame save/restore when the store is
-// already current, so a bind() invoked synchronously in the context it
-// captured depends entirely on exit() restoring the right value.
 import * as tap from "tap";
 import cls from "../../index";
 
