@@ -9,8 +9,6 @@ test("bind() invoked synchronously inside its own context keeps the chain's cont
   const ns = cls.createNamespace("reentrant-bind");
   t.teardown(() => cls.destroyNamespace("reentrant-bind"));
 
-  // The context-logger idiom: bind to the currently-active context and call
-  // the bound function immediately.
   const readViaBind = (): unknown => {
     const bound = ns.bind(() => ns.get("k"));
     return bound();
