@@ -40,8 +40,6 @@ test("bind(fn, ns.active) invoked synchronously keeps the chain's context", asyn
     ns.set("k", 1);
     await new Promise((resolve) => setTimeout(resolve, 5));
 
-    // Explicit-context flavor of the same idiom (what bindEmitter's wrap
-    // does when an emitter fires inside the context its listener captured).
     const bound = ns.bind(() => ns.get("k"), ns.active!);
     t.equal(bound(), 1, "explicitly re-bound function sees the context");
 
