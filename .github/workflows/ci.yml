@@ -2,46 +2,65 @@ name: CI
 
 on:
   pull_request:
-    branches: [ master ]
   push:
-    branches: [ master]
+    branches: [master, v5]
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-    - name: Install dependencies
-      run: npm ci
-    - name: Lint
-      run: npm run lint
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22: AsyncLocalStorage backed by async_hooks internals
+        # 24: AsyncLocalStorage backed by AsyncContextFrame
+        node-version: ["22", "24"]
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-    - name: Install dependencies
-      run: npm ci
-    - name: Test
-      run: npm run test
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm run test
 
   compile:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-    - name: Install dependencies
-      run: npm ci
-    - name: Compile
-      run: npm run compile
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm ci
+      - name: Compile
+        run: npm run compile
+      - name: Verify CommonJS drop-in interface
+        run: |
+          node -e "
+          const cls = require('./dist/index.js');
+          const assert = require('assert');
+          assert.equal(typeof cls.createNamespace, 'function', 'createNamespace must be a named CJS export');
+          assert.equal(typeof cls.getNamespace, 'function');
+          assert.equal(typeof cls.destroyNamespace, 'function');
+          assert.equal(typeof cls.reset, 'function');
+          assert.equal(cls.ERROR_SYMBOL, 'error@context');
+          const ns = cls.createNamespace('smoke');
+          ns.run(() => { ns.set('k', 1); assert.equal(ns.get('k'), 1); });
+          console.log('CJS drop-in interface OK');
+          "

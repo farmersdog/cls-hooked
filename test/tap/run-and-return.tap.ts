@@ -1,14 +1,14 @@
-'use strict';
+"use strict";
 
 // stdlib
-import * as tap from 'tap';
-import { EventEmitter } from 'events';
-import cls from '../../index';
+import * as tap from "tap";
+import { EventEmitter } from "events";
+import cls from "../../index";
 
 const test = tap.test;
 
 // multiple contexts in use
-const tracer = cls.createNamespace('tracer');
+const tracer = cls.createNamespace("tracer");
 
 interface Transaction {
   status: string;
@@ -19,24 +19,28 @@ test("simple tracer built on contexts", function (t) {
 
   const harvester = new EventEmitter();
 
-  harvester.on('finished', function (transaction: Transaction) {
+  harvester.on("finished", function (transaction: Transaction) {
     t.ok(transaction, "transaction should have been passed in");
-    t.equal(transaction.status, 'ok', "transaction should have finished OK");
+    t.equal(transaction.status, "ok", "transaction should have finished OK");
     t.equal(Object.keys(process.namespaces).length, 1, "Should only have one namespace.");
   });
 
   const returnValue = {};
 
-  const returnedValue = tracer.runAndReturn(function(context) {
+  const returnedValue = tracer.runAndReturn(function (context) {
     t.ok(tracer.active, "tracer should have an active context");
-    tracer.set('transaction', {status: 'ok'});
-    t.ok(tracer.get('transaction'), "can retrieve newly-set value");
-    t.equal(tracer.get('transaction').status, 'ok', "value should be correct");
+    tracer.set("transaction", { status: "ok" });
+    t.ok(tracer.get("transaction"), "can retrieve newly-set value");
+    t.equal(tracer.get("transaction").status, "ok", "value should be correct");
 
-    harvester.emit('finished', context.transaction);
+    harvester.emit("finished", context.transaction);
 
     return returnValue;
   });
 
-  t.equal(returnedValue, returnValue, "method should pass through return value of function run in scope");
+  t.equal(
+    returnedValue,
+    returnValue,
+    "method should pass through return value of function run in scope",
+  );
 });

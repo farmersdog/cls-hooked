@@ -1,28 +1,28 @@
-'use strict';
+"use strict";
 
-import * as os from 'os';
-import * as fs from 'fs';
-import * as path from 'path';
-import { exec } from 'child_process';
-import * as tap from 'tap';
-import cls from '../../index';
+import * as os from "os";
+import * as fs from "fs";
+import * as path from "path";
+import { exec } from "child_process";
+import * as tap from "tap";
+import cls from "../../index";
 
 const test = tap.test;
 
 // CONSTANTS
-const FILENAME = '__testfile';
-const DIRNAME = '__TESTDIR';
-const LINKNAME = '__testlink';
-const HARDLINKNAME = '__testhardlink';
+const FILENAME = "__testfile";
+const DIRNAME = "__TESTDIR";
+const LINKNAME = "__testlink";
+const HARDLINKNAME = "__testhardlink";
 
 function createFile(assert: any): void {
   const contents = Buffer.from("UHOH");
-  const file = fs.openSync(FILENAME, 'w');
+  const file = fs.openSync(FILENAME, "w");
   const written = fs.writeSync(file, contents, 0, contents.length, 0);
   assert.equal(written, contents.length, "whole buffer was written");
   fs.closeSync(file);
   // need this here to avoid dealing with umask complications
-  fs.chmodSync(FILENAME, '0666');
+  fs.chmodSync(FILENAME, "0666");
 }
 
 function deleteFile(): void {
@@ -34,7 +34,7 @@ function createLink(assert: any): void {
   fs.symlinkSync(FILENAME, LINKNAME);
   if (fs.lchmodSync) {
     // This function only exists on BSD systems (like OSX)
-    fs.lchmodSync(LINKNAME, '0777');
+    fs.lchmodSync(LINKNAME, "0777");
   }
 }
 
@@ -52,17 +52,21 @@ function deleteDirectory(): void {
   fs.rmdirSync(DIRNAME);
 }
 
-function mapIds(username: string, groupname: string, callback: (error: Error | null, uid?: number, gid?: number) => void): void {
+function mapIds(
+  username: string,
+  groupname: string,
+  callback: (error: Error | null, uid?: number, gid?: number) => void,
+): void {
   if (!callback) throw new Error("mapIds requires callback");
   if (!username) return callback(new Error("mapIds requires username"));
   if (!groupname) return callback(new Error("mapIds requires groupname"));
 
-  exec('id -u ' + username, function (error, stdout, stderr) {
+  exec("id -u " + username, function (error, stdout, stderr) {
     if (error) return callback(error);
     if (stderr) return callback(new Error(stderr.toString()));
 
     const uid = +stdout;
-    exec('id -g ' + groupname, function (error, stdout, stderr) {
+    exec("id -g " + groupname, function (error, stdout, stderr) {
       if (error) return callback(error);
       if (stderr) return callback(new Error(stderr.toString()));
 
@@ -81,7 +85,7 @@ try {
 }
 
 test("continuation-local state with MakeCallback and fs module", function (t) {
-  if (os.platform() === 'win32') {
+  if (os.platform() === "win32") {
     t.plan(0);
     return;
   }
@@ -89,23 +93,26 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
   // Setting the plan to match all the subtests we run
   t.plan(33);
 
-  const namespace = cls.createNamespace('fs');
+  const namespace = cls.createNamespace("fs");
   namespace.run(function () {
-    namespace.set('test', 0xabad1dea);
+    namespace.set("test", 0xabad1dea);
 
     t.test("fs.rename", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'rename');
-        t.equal(namespace.get('test'), 'rename', "state has been mutated");
+        namespace.set("test", "rename");
+        t.equal(namespace.get("test"), "rename", "state has been mutated");
 
-        fs.rename(FILENAME, '__renamed', function (error) {
+        fs.rename(FILENAME, "__renamed", function (error) {
           t.notOk(error, "renaming shouldn't error");
-          t.equal(namespace.get('test'), 'rename',
-            "mutated state has persisted to fs.rename's callback");
+          t.equal(
+            namespace.get("test"),
+            "rename",
+            "mutated state has persisted to fs.rename's callback",
+          );
 
-          fs.unlinkSync('__renamed');
+          fs.unlinkSync("__renamed");
           t.end();
         });
       });
@@ -118,8 +125,8 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'truncate');
-        t.equal(namespace.get('test'), 'truncate', "state has been mutated");
+        namespace.set("test", "truncate");
+        t.equal(namespace.get("test"), "truncate", "state has been mutated");
 
         fs.truncate(FILENAME, 0, function (error) {
           t.notOk(error, "truncation shouldn't error");
@@ -127,8 +134,11 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
           const stats = fs.statSync(FILENAME);
           t.equal(stats.size, 0, "file has been truncated");
 
-          t.equal(namespace.get('test'), 'truncate',
-            "mutated state has persisted to fs.truncate's callback");
+          t.equal(
+            namespace.get("test"),
+            "truncate",
+            "mutated state has persisted to fs.truncate's callback",
+          );
 
           deleteFile();
           t.end();
@@ -143,10 +153,10 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       const truncate = fs.ftruncate ? fs.ftruncate : fs.truncate;
 
       namespace.run(function () {
-        namespace.set('test', 'ftruncate');
-        t.equal(namespace.get('test'), 'ftruncate', "state has been mutated");
+        namespace.set("test", "ftruncate");
+        t.equal(namespace.get("test"), "ftruncate", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'w');
+        const file = fs.openSync(FILENAME, "w");
         // Using type assertion to handle the union type issue
         (truncate as typeof fs.ftruncate)(file, 0, function (error: NodeJS.ErrnoException | null) {
           t.notOk(error, "truncation shouldn't error");
@@ -155,8 +165,11 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
           const stats = fs.statSync(FILENAME);
           t.equal(stats.size, 0, "file has been truncated");
 
-          t.equal(namespace.get('test'), 'ftruncate',
-            "mutated state has persisted to fs.ftruncate's callback");
+          t.equal(
+            namespace.get("test"),
+            "ftruncate",
+            "mutated state has persisted to fs.ftruncate's callback",
+          );
 
           deleteFile();
           t.end();
@@ -167,20 +180,23 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
     t.test("fs.chown", function (t) {
       createFile(t);
 
-      mapIds('daemon', 'daemon', function (error, uid, gid) {
+      mapIds("daemon", "daemon", function (error, uid, gid) {
         t.notOk(error, "looking up uid & gid shouldn't error");
         t.ok(uid, "uid for daemon was found");
         t.ok(gid, "gid for daemon was found");
 
         namespace.run(function () {
-          namespace.set('test', 'chown');
-          t.equal(namespace.get('test'), 'chown', "state has been mutated");
+          namespace.set("test", "chown");
+          t.equal(namespace.get("test"), "chown", "state has been mutated");
 
           fs.chown(FILENAME, uid!, gid!, function (error) {
             t.ok(error, "changing ownership will error for non-root users");
 
-            t.equal(namespace.get('test'), 'chown',
-              "mutated state has persisted to fs.chown's callback");
+            t.equal(
+              namespace.get("test"),
+              "chown",
+              "mutated state has persisted to fs.chown's callback",
+            );
 
             deleteFile();
             t.end();
@@ -192,21 +208,24 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
     t.test("fs.fchown", function (t) {
       createFile(t);
 
-      mapIds('daemon', 'daemon', function (error, uid, gid) {
+      mapIds("daemon", "daemon", function (error, uid, gid) {
         t.notOk(error, "looking up uid & gid shouldn't error");
         t.ok(uid, "uid for daemon was found");
         t.ok(gid, "gid for daemon was found");
 
         namespace.run(function () {
-          namespace.set('test', 'fchown');
-          t.equal(namespace.get('test'), 'fchown', "state has been mutated");
+          namespace.set("test", "fchown");
+          t.equal(namespace.get("test"), "fchown", "state has been mutated");
 
-          const file = fs.openSync(FILENAME, 'w');
+          const file = fs.openSync(FILENAME, "w");
           fs.fchown(file, uid!, gid!, function (error) {
             t.ok(error, "changing ownership will error for non-root users");
 
-            t.equal(namespace.get('test'), 'fchown',
-              "mutated state has persisted to fs.fchown's callback");
+            t.equal(
+              namespace.get("test"),
+              "fchown",
+              "mutated state has persisted to fs.fchown's callback",
+            );
 
             fs.closeSync(file);
             deleteFile();
@@ -220,20 +239,23 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       if (!fs.lchown) return t.end();
       createLink(t);
 
-      mapIds('daemon', 'daemon', function (error, uid, gid) {
+      mapIds("daemon", "daemon", function (error, uid, gid) {
         t.notOk(error, "looking up uid & gid shouldn't error");
         t.ok(uid, "uid for daemon was found");
         t.ok(gid, "gid for daemon was found");
 
         namespace.run(function () {
-          namespace.set('test', 'lchown');
-          t.equal(namespace.get('test'), 'lchown', "state has been mutated");
+          namespace.set("test", "lchown");
+          t.equal(namespace.get("test"), "lchown", "state has been mutated");
 
           fs.lchown(LINKNAME, uid!, gid!, function (error) {
             t.ok(error, "changing ownership will error for non-root users");
 
-            t.equal(namespace.get('test'), 'lchown',
-              "mutated state has persisted to fs.lchown's callback");
+            t.equal(
+              namespace.get("test"),
+              "lchown",
+              "mutated state has persisted to fs.lchown's callback",
+            );
 
             deleteLink();
             t.end();
@@ -246,17 +268,20 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'chmod');
-        t.equal(namespace.get('test'), 'chmod', "state has been mutated");
+        namespace.set("test", "chmod");
+        t.equal(namespace.get("test"), "chmod", "state has been mutated");
 
-        fs.chmod(FILENAME, '0700', function (error) {
+        fs.chmod(FILENAME, "0700", function (error) {
           t.notOk(error, "changing mode shouldn't error");
 
-          t.equal(namespace.get('test'), 'chmod',
-            "mutated state has persisted to fs.chmod's callback");
+          t.equal(
+            namespace.get("test"),
+            "chmod",
+            "mutated state has persisted to fs.chmod's callback",
+          );
 
           const stats = fs.statSync(FILENAME);
-          t.equal(stats.mode.toString(8), '100700', "extra access bits are stripped");
+          t.equal(stats.mode.toString(8), "100700", "extra access bits are stripped");
 
           deleteFile();
           t.end();
@@ -268,19 +293,22 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'fchmod');
-        t.equal(namespace.get('test'), 'fchmod', "state has been mutated");
+        namespace.set("test", "fchmod");
+        t.equal(namespace.get("test"), "fchmod", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'w+');
-        fs.fchmod(file, '0700', function (error) {
+        const file = fs.openSync(FILENAME, "w+");
+        fs.fchmod(file, "0700", function (error) {
           t.notOk(error, "changing mode shouldn't error");
 
-          t.equal(namespace.get('test'), 'fchmod',
-            "mutated state has persisted to fs.fchmod's callback");
+          t.equal(
+            namespace.get("test"),
+            "fchmod",
+            "mutated state has persisted to fs.fchmod's callback",
+          );
 
           fs.closeSync(file);
           const stats = fs.statSync(FILENAME);
-          t.equal(stats.mode.toString(8), '100700', "extra access bits are stripped");
+          t.equal(stats.mode.toString(8), "100700", "extra access bits are stripped");
 
           deleteFile();
           t.end();
@@ -293,17 +321,20 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createLink(t);
 
       namespace.run(function () {
-        namespace.set('test', 'lchmod');
-        t.equal(namespace.get('test'), 'lchmod', "state has been mutated");
+        namespace.set("test", "lchmod");
+        t.equal(namespace.get("test"), "lchmod", "state has been mutated");
 
-        fs.lchmod(LINKNAME, '0700', function (error) {
+        fs.lchmod(LINKNAME, "0700", function (error) {
           t.notOk(error, "changing mode shouldn't error");
 
-          t.equal(namespace.get('test'), 'lchmod',
-            "mutated state has persisted to fs.lchmod's callback");
+          t.equal(
+            namespace.get("test"),
+            "lchmod",
+            "mutated state has persisted to fs.lchmod's callback",
+          );
 
           const stats = fs.lstatSync(LINKNAME);
-          t.equal(stats.mode.toString(8), '120700', "extra access bits are stripped");
+          t.equal(stats.mode.toString(8), "120700", "extra access bits are stripped");
 
           deleteLink();
           t.end();
@@ -315,16 +346,19 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'stat');
-        t.equal(namespace.get('test'), 'stat', "state has been mutated");
+        namespace.set("test", "stat");
+        t.equal(namespace.get("test"), "stat", "state has been mutated");
 
         fs.stat(FILENAME, function (error, stats) {
           t.notOk(error, "reading stats shouldn't error");
 
-          t.equal(namespace.get('test'), 'stat',
-            "mutated state has persisted to fs.stat's callback");
+          t.equal(
+            namespace.get("test"),
+            "stat",
+            "mutated state has persisted to fs.stat's callback",
+          );
 
-          t.equal(stats.mode.toString(8), '100666', "permissions should be as created");
+          t.equal(stats.mode.toString(8), "100666", "permissions should be as created");
 
           deleteFile();
           t.end();
@@ -336,17 +370,20 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'fstat');
-        t.equal(namespace.get('test'), 'fstat', "state has been mutated");
+        namespace.set("test", "fstat");
+        t.equal(namespace.get("test"), "fstat", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'r');
+        const file = fs.openSync(FILENAME, "r");
         fs.fstat(file, function (error, stats) {
           t.notOk(error, "reading stats shouldn't error");
 
-          t.equal(namespace.get('test'), 'fstat',
-            "mutated state has persisted to fs.fstat's callback");
+          t.equal(
+            namespace.get("test"),
+            "fstat",
+            "mutated state has persisted to fs.fstat's callback",
+          );
 
-          t.equal(stats.mode.toString(8), '100666', "permissions should be as created");
+          t.equal(stats.mode.toString(8), "100666", "permissions should be as created");
 
           fs.closeSync(file);
           deleteFile();
@@ -359,20 +396,19 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createLink(t);
 
       namespace.run(function () {
-        namespace.set('test', 'lstat');
-        t.equal(namespace.get('test'), 'lstat', "state has been mutated");
+        namespace.set("test", "lstat");
+        t.equal(namespace.get("test"), "lstat", "state has been mutated");
 
         fs.lstat(LINKNAME, function (error, stats) {
           t.notOk(error, "reading stats shouldn't error");
 
-          t.equal(namespace.get('test'), 'lstat',
-            "mutated state has persisted to fs.lstat's callback");
-
           t.equal(
-            stats.mode.toString(8),
-            '120777',
-            "permissions should be as created"
+            namespace.get("test"),
+            "lstat",
+            "mutated state has persisted to fs.lstat's callback",
           );
+
+          t.equal(stats.mode.toString(8), "120777", "permissions should be as created");
 
           deleteLink();
           t.end();
@@ -384,14 +420,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'link');
-        t.equal(namespace.get('test'), 'link', "state has been mutated");
+        namespace.set("test", "link");
+        t.equal(namespace.get("test"), "link", "state has been mutated");
 
         fs.link(FILENAME, HARDLINKNAME, function (error) {
           t.notOk(error, "creating a link shouldn't error");
 
-          t.equal(namespace.get('test'), 'link',
-            "mutated state has persisted to fs.link's callback");
+          t.equal(
+            namespace.get("test"),
+            "link",
+            "mutated state has persisted to fs.link's callback",
+          );
 
           const orig = fs.statSync(FILENAME);
           const linked = fs.statSync(HARDLINKNAME);
@@ -408,14 +447,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'symlink');
-        t.equal(namespace.get('test'), 'symlink', "state has been mutated");
+        namespace.set("test", "symlink");
+        t.equal(namespace.get("test"), "symlink", "state has been mutated");
 
         fs.symlink(FILENAME, LINKNAME, function (error) {
           t.notOk(error, "creating a symlink shouldn't error");
 
-          t.equal(namespace.get('test'), 'symlink',
-            "mutated state has persisted to fs.symlink's callback");
+          t.equal(
+            namespace.get("test"),
+            "symlink",
+            "mutated state has persisted to fs.symlink's callback",
+          );
 
           const pointed = fs.readlinkSync(LINKNAME);
           t.equal(pointed, FILENAME, "symlink points back to original file");
@@ -431,14 +473,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createLink(t);
 
       namespace.run(function () {
-        namespace.set('test', 'readlink');
-        t.equal(namespace.get('test'), 'readlink', "state has been mutated");
+        namespace.set("test", "readlink");
+        t.equal(namespace.get("test"), "readlink", "state has been mutated");
 
         fs.readlink(LINKNAME, function (error, pointed) {
           t.notOk(error, "reading symlink shouldn't error");
 
-          t.equal(namespace.get('test'), 'readlink',
-            "mutated state has persisted to fs.readlink's callback");
+          t.equal(
+            namespace.get("test"),
+            "readlink",
+            "mutated state has persisted to fs.readlink's callback",
+          );
 
           t.equal(pointed, FILENAME, "symlink points back to original file");
 
@@ -452,14 +497,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'unlink');
-        t.equal(namespace.get('test'), 'unlink', "state has been mutated");
+        namespace.set("test", "unlink");
+        t.equal(namespace.get("test"), "unlink", "state has been mutated");
 
         fs.unlink(FILENAME, function (error) {
           t.notOk(error, "deleting file shouldn't error");
 
-          t.equal(namespace.get('test'), 'unlink',
-            "mutated state has persisted to fs.unlink's callback");
+          t.equal(
+            namespace.get("test"),
+            "unlink",
+            "mutated state has persisted to fs.unlink's callback",
+          );
 
           t.notOk(fs.existsSync(FILENAME), "file should be gone");
           t.end();
@@ -471,14 +519,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'realpath');
-        t.equal(namespace.get('test'), 'realpath', "state has been mutated");
+        namespace.set("test", "realpath");
+        t.equal(namespace.get("test"), "realpath", "state has been mutated");
 
         fs.realpath(FILENAME, function (error, real) {
           t.notOk(error, "resolving path shouldn't error");
 
-          t.equal(namespace.get('test'), 'realpath',
-            "mutated state has persisted to fs.realpath's callback");
+          t.equal(
+            namespace.get("test"),
+            "realpath",
+            "mutated state has persisted to fs.realpath's callback",
+          );
 
           t.equal(real, path.resolve(FILENAME), "no funny business with the real path");
 
@@ -490,14 +541,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
 
     t.test("fs.mkdir", function (t) {
       namespace.run(function () {
-        namespace.set('test', 'mkdir');
-        t.equal(namespace.get('test'), 'mkdir', "state has been mutated");
+        namespace.set("test", "mkdir");
+        t.equal(namespace.get("test"), "mkdir", "state has been mutated");
 
         fs.mkdir(DIRNAME, function (error) {
           t.notOk(error, "creating directory shouldn't error");
 
-          t.equal(namespace.get('test'), 'mkdir',
-            "mutated state has persisted to fs.mkdir's callback");
+          t.equal(
+            namespace.get("test"),
+            "mkdir",
+            "mutated state has persisted to fs.mkdir's callback",
+          );
 
           t.ok(fs.existsSync(DIRNAME), "directory was created");
 
@@ -511,14 +565,17 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createDirectory(t);
 
       namespace.run(function () {
-        namespace.set('test', 'rmdir');
-        t.equal(namespace.get('test'), 'rmdir', "state has been mutated");
+        namespace.set("test", "rmdir");
+        t.equal(namespace.get("test"), "rmdir", "state has been mutated");
 
         fs.rmdir(DIRNAME, function (error) {
           t.notOk(error, "deleting directory shouldn't error");
 
-          t.equal(namespace.get('test'), 'rmdir',
-            "mutated state has persisted to fs.rmdir's callback");
+          t.equal(
+            namespace.get("test"),
+            "rmdir",
+            "mutated state has persisted to fs.rmdir's callback",
+          );
 
           t.notOk(fs.existsSync(DIRNAME), "directory was removed");
 
@@ -530,33 +587,36 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
     t.test("fs.readdir", function (t) {
       createDirectory(t);
 
-      const file1 = fs.openSync(path.join(DIRNAME, 'file1'), 'w');
-      fs.writeSync(file1, 'one');
+      const file1 = fs.openSync(path.join(DIRNAME, "file1"), "w");
+      fs.writeSync(file1, "one");
       fs.closeSync(file1);
 
-      const file2 = fs.openSync(path.join(DIRNAME, 'file2'), 'w');
-      fs.writeSync(file2, 'two');
+      const file2 = fs.openSync(path.join(DIRNAME, "file2"), "w");
+      fs.writeSync(file2, "two");
       fs.closeSync(file2);
 
-      const file3 = fs.openSync(path.join(DIRNAME, 'file3'), 'w');
-      fs.writeSync(file3, 'three');
+      const file3 = fs.openSync(path.join(DIRNAME, "file3"), "w");
+      fs.writeSync(file3, "three");
       fs.closeSync(file3);
 
       namespace.run(function () {
-        namespace.set('test', 'readdir');
-        t.equal(namespace.get('test'), 'readdir', "state has been mutated");
+        namespace.set("test", "readdir");
+        t.equal(namespace.get("test"), "readdir", "state has been mutated");
 
         fs.readdir(DIRNAME, function (error, contents) {
           t.notOk(error, "reading directory shouldn't error");
 
-          t.equal(namespace.get('test'), 'readdir',
-            "mutated state has persisted to fs.readdir's callback");
+          t.equal(
+            namespace.get("test"),
+            "readdir",
+            "mutated state has persisted to fs.readdir's callback",
+          );
 
           t.equal(contents.length, 3, "3 files were found");
 
-          fs.unlinkSync(path.join(DIRNAME, 'file1'));
-          fs.unlinkSync(path.join(DIRNAME, 'file2'));
-          fs.unlinkSync(path.join(DIRNAME, 'file3'));
+          fs.unlinkSync(path.join(DIRNAME, "file1"));
+          fs.unlinkSync(path.join(DIRNAME, "file2"));
+          fs.unlinkSync(path.join(DIRNAME, "file3"));
           deleteDirectory();
           t.end();
         });
@@ -567,18 +627,21 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'open');
-        t.equal(namespace.get('test'), 'open', "state has been mutated");
+        namespace.set("test", "open");
+        t.equal(namespace.get("test"), "open", "state has been mutated");
 
-        fs.open(FILENAME, 'r', function (error, file) {
+        fs.open(FILENAME, "r", function (error, file) {
           t.notOk(error, "opening the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'open',
-            "mutated state has persisted to fs.open's callback");
+          t.equal(
+            namespace.get("test"),
+            "open",
+            "mutated state has persisted to fs.open's callback",
+          );
 
           const contents = Buffer.alloc(4);
           fs.readSync(file, contents, 0, 4, 0);
-          t.equal(contents.toString(), 'UHOH', "contents are still available");
+          t.equal(contents.toString(), "UHOH", "contents are still available");
 
           fs.closeSync(file);
           deleteFile();
@@ -591,15 +654,18 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'close');
-        t.equal(namespace.get('test'), 'close', "state has been mutated");
+        namespace.set("test", "close");
+        t.equal(namespace.get("test"), "close", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'r');
+        const file = fs.openSync(FILENAME, "r");
         fs.close(file, function (error) {
           t.notOk(error, "closing the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'close',
-            "mutated state has persisted to fs.close's callback");
+          t.equal(
+            namespace.get("test"),
+            "close",
+            "mutated state has persisted to fs.close's callback",
+          );
 
           deleteFile();
           t.end();
@@ -611,18 +677,21 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'read');
-        t.equal(namespace.get('test'), 'read', "state has been mutated");
+        namespace.set("test", "read");
+        t.equal(namespace.get("test"), "read", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'r');
+        const file = fs.openSync(FILENAME, "r");
         const contents = Buffer.alloc(4);
         fs.read(file, contents, 0, 4, 0, function (error) {
           t.notOk(error, "reading from the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'read',
-            "mutated state has persisted to fs.read's callback");
+          t.equal(
+            namespace.get("test"),
+            "read",
+            "mutated state has persisted to fs.read's callback",
+          );
 
-          t.equal(contents.toString(), 'UHOH', "contents are still available");
+          t.equal(contents.toString(), "UHOH", "contents are still available");
 
           fs.closeSync(file);
           deleteFile();
@@ -635,21 +704,24 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'write');
-        t.equal(namespace.get('test'), 'write', "state has been mutated");
+        namespace.set("test", "write");
+        t.equal(namespace.get("test"), "write", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'w');
-        const contents = Buffer.from('yeap');
+        const file = fs.openSync(FILENAME, "w");
+        const contents = Buffer.from("yeap");
         fs.write(file, contents, 0, 4, 0, function (error) {
           t.notOk(error, "writing to the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'write',
-            "mutated state has persisted to fs.write's callback");
+          t.equal(
+            namespace.get("test"),
+            "write",
+            "mutated state has persisted to fs.write's callback",
+          );
 
           fs.closeSync(file);
 
           const readback = fs.readFileSync(FILENAME);
-          t.equal(readback.toString(), 'yeap', "contents are still available");
+          t.equal(readback.toString(), "yeap", "contents are still available");
 
           deleteFile();
           t.end();
@@ -661,16 +733,19 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'readFile');
-        t.equal(namespace.get('test'), 'readFile', "state has been mutated");
+        namespace.set("test", "readFile");
+        t.equal(namespace.get("test"), "readFile", "state has been mutated");
 
         fs.readFile(FILENAME, function (error, contents) {
           t.notOk(error, "reading from the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'readFile',
-            "mutated state has persisted to fs.readFile's callback");
+          t.equal(
+            namespace.get("test"),
+            "readFile",
+            "mutated state has persisted to fs.readFile's callback",
+          );
 
-          t.equal(contents.toString(), 'UHOH', "contents are still available");
+          t.equal(contents.toString(), "UHOH", "contents are still available");
 
           deleteFile();
           t.end();
@@ -682,17 +757,20 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'writeFile');
-        t.equal(namespace.get('test'), 'writeFile', "state has been mutated");
+        namespace.set("test", "writeFile");
+        t.equal(namespace.get("test"), "writeFile", "state has been mutated");
 
-        fs.writeFile(FILENAME, 'woopwoop', function (error) {
+        fs.writeFile(FILENAME, "woopwoop", function (error) {
           t.notOk(error, "rewriting the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'writeFile',
-            "mutated state has persisted to fs.writeFile's callback");
+          t.equal(
+            namespace.get("test"),
+            "writeFile",
+            "mutated state has persisted to fs.writeFile's callback",
+          );
 
           const readback = fs.readFileSync(FILENAME);
-          t.equal(readback.toString(), 'woopwoop', "rewritten contents are available");
+          t.equal(readback.toString(), "woopwoop", "rewritten contents are available");
 
           deleteFile();
           t.end();
@@ -704,18 +782,20 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'appendFile');
-        t.equal(namespace.get('test'), 'appendFile', "state has been mutated");
+        namespace.set("test", "appendFile");
+        t.equal(namespace.get("test"), "appendFile", "state has been mutated");
 
-        fs.appendFile(FILENAME, '/jk', function (error) {
+        fs.appendFile(FILENAME, "/jk", function (error) {
           t.notOk(error, "appending to the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'appendFile',
-            "mutated state has persisted to fs.appendFile's callback");
+          t.equal(
+            namespace.get("test"),
+            "appendFile",
+            "mutated state has persisted to fs.appendFile's callback",
+          );
 
           const readback = fs.readFileSync(FILENAME);
-          t.equal(readback.toString(), 'UHOH/jk',
-            "appended contents are still available");
+          t.equal(readback.toString(), "UHOH/jk", "appended contents are still available");
 
           deleteFile();
           t.end();
@@ -727,18 +807,24 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'exists');
-        t.equal(namespace.get('test'), 'exists', "state has been mutated");
+        namespace.set("test", "exists");
+        t.equal(namespace.get("test"), "exists", "state has been mutated");
 
         fs.access(FILENAME, fs.constants.F_OK, function (error) {
-          t.equal(namespace.get('test'), 'exists',
-            "mutated state has persisted to fs.access's callback");
+          t.equal(
+            namespace.get("test"),
+            "exists",
+            "mutated state has persisted to fs.access's callback",
+          );
 
           t.notOk(error, "precreated file does indeed exist.");
 
-          fs.access('NOPENOWAY', fs.constants.F_OK, function (error) {
-            t.equal(namespace.get('test'), 'exists',
-              "mutated state continues to persist to fs.access's second callback");
+          fs.access("NOPENOWAY", fs.constants.F_OK, function (error) {
+            t.equal(
+              namespace.get("test"),
+              "exists",
+              "mutated state continues to persist to fs.access's second callback",
+            );
 
             t.ok(error, "nonexistent file doesn't exist.");
 
@@ -749,43 +835,44 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       });
     });
 
-    t.test("fs.watch", {timeout: 5000}, function (t) {
+    t.test("fs.watch", { timeout: 5000 }, function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'watch');
-        t.equal(namespace.get('test'), 'watch', "state has been mutated");
+        namespace.set("test", "watch");
+        t.equal(namespace.get("test"), "watch", "state has been mutated");
+
+        // The non-persistent watcher doesn't hold the event loop open, so
+        // keep it alive until the watcher fires. This does NOT mask failure:
+        // if the watcher never fires, the keep-alive expires and the test
+        // fails as unfinished.
+        const keepAlive = setTimeout(function () {}, 4500);
 
         let watcherClosed = false;
-        const watcher = fs.watch(FILENAME, {persistent: false},
-           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          function (eventType: string, filename: string | null) {
+        const watcher = fs.watch(
+          FILENAME,
+          { persistent: false },
+          function (eventType: string, _filename: string | null) {
             if (watcherClosed) return;
             watcherClosed = true;
+            clearTimeout(keepAlive);
 
-            t.equal(namespace.get('test'), 'watch',
-              "mutated state has persisted to fs.watch's callback");
+            t.equal(
+              namespace.get("test"),
+              "watch",
+              "mutated state has persisted to fs.watch's callback",
+            );
 
-            t.equal(eventType, 'change', "file was changed");
+            t.equal(eventType, "change", "file was changed");
 
             watcher.close();
             deleteFile();
             t.end();
-          });
+          },
+        );
 
-        // Ensure test completes even if watcher doesn't trigger
-        const timeout = setTimeout(function() {
-          if (watcherClosed) return;
-          watcherClosed = true;
-          watcher.close();
-          t.pass("fs.watch test completing via timeout");
-          deleteFile();
-          t.end();
-        }, 3000);
-
-        // Clean up timeout if test ends normally
         t.teardown(() => {
-          clearTimeout(timeout);
+          clearTimeout(keepAlive);
           if (!watcherClosed) {
             watcherClosed = true;
             watcher.close();
@@ -794,7 +881,7 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
 
         setTimeout(function poke() {
           try {
-            fs.writeFileSync(FILENAME, 'still a test');
+            fs.writeFileSync(FILENAME, "still a test");
           } catch (e: any) {
             t.fail("Failed to write to test file: " + e.message);
             if (!watcherClosed) {
@@ -816,8 +903,8 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       const PASTIME = new Date(Math.floor((Date.now() - 31337) / 1000) * 1000);
 
       namespace.run(function () {
-        namespace.set('test', 'utimes');
-        t.equal(namespace.get('test'), 'utimes', "state has been mutated");
+        namespace.set("test", "utimes");
+        t.equal(namespace.get("test"), "utimes", "state has been mutated");
 
         const before = fs.statSync(FILENAME);
         t.ok(before.atime, "access time of newly-created file set");
@@ -826,12 +913,23 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
         fs.utimes(FILENAME, PASTIME, PASTIME, function (error) {
           t.notOk(error, "setting utimes shouldn't error");
 
-          t.equal(namespace.get('test'), 'utimes',
-            "mutated state has persisted to fs.utimes's callback");
+          t.equal(
+            namespace.get("test"),
+            "utimes",
+            "mutated state has persisted to fs.utimes's callback",
+          );
 
           const after = fs.statSync(FILENAME);
-          t.equal(after.atime.getTime(), PASTIME.getTime(), "access time of newly-created file is reset");
-          t.equal(after.mtime.getTime(), PASTIME.getTime(), "mod time of newly-created file is reset");
+          t.equal(
+            after.atime.getTime(),
+            PASTIME.getTime(),
+            "access time of newly-created file is reset",
+          );
+          t.equal(
+            after.mtime.getTime(),
+            PASTIME.getTime(),
+            "mod time of newly-created file is reset",
+          );
           t.ok(before.atime.getTime() !== after.atime.getTime(), "access time changed");
           t.ok(before.mtime.getTime() !== after.mtime.getTime(), "mod time changed");
 
@@ -850,8 +948,8 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       const PASTIME = new Date(Math.floor((Date.now() - 0xb33fd) / 1000) * 1000);
 
       namespace.run(function () {
-        namespace.set('test', 'futimes');
-        t.equal(namespace.get('test'), 'futimes', "state has been mutated");
+        namespace.set("test", "futimes");
+        t.equal(namespace.get("test"), "futimes", "state has been mutated");
 
         const before = fs.statSync(FILENAME);
         t.ok(before.atime, "access time of newly-created file set");
@@ -862,12 +960,23 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
           t.notOk(error, "setting futimes shouldn't error");
           fs.closeSync(file);
 
-          t.equal(namespace.get('test'), 'futimes',
-            "mutated state has persisted to fs.futimes's callback");
+          t.equal(
+            namespace.get("test"),
+            "futimes",
+            "mutated state has persisted to fs.futimes's callback",
+          );
 
           const after = fs.statSync(FILENAME);
-          t.equal(after.atime.getTime(), PASTIME.getTime(), "access time of newly-created file is reset");
-          t.equal(after.mtime.getTime(), PASTIME.getTime(), "mod time of newly-created file is reset");
+          t.equal(
+            after.atime.getTime(),
+            PASTIME.getTime(),
+            "access time of newly-created file is reset",
+          );
+          t.equal(
+            after.mtime.getTime(),
+            PASTIME.getTime(),
+            "mod time of newly-created file is reset",
+          );
           t.ok(before.atime.getTime() !== after.atime.getTime(), "access time changed");
           t.ok(before.mtime.getTime() !== after.mtime.getTime(), "mod time changed");
 
@@ -881,15 +990,18 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'fsync');
-        t.equal(namespace.get('test'), 'fsync', "state has been mutated");
+        namespace.set("test", "fsync");
+        t.equal(namespace.get("test"), "fsync", "state has been mutated");
 
-        const file = fs.openSync(FILENAME, 'w+');
+        const file = fs.openSync(FILENAME, "w+");
         fs.fsync(file, function (error) {
           t.notOk(error, "syncing the file shouldn't error");
 
-          t.equal(namespace.get('test'), 'fsync',
-            "mutated state has persisted to fs.fsync's callback");
+          t.equal(
+            namespace.get("test"),
+            "fsync",
+            "mutated state has persisted to fs.fsync's callback",
+          );
 
           fs.closeSync(file);
           deleteFile();
@@ -898,18 +1010,22 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
       });
     });
 
-    t.test("fs.watchFile", {timeout: 10000, diagnostic: true}, function (t) {
-      t.comment('starting: fs.watchFile test');
+    t.test("fs.watchFile", { timeout: 10000, diagnostic: true }, function (t) {
+      t.comment("starting: fs.watchFile test");
       createFile(t);
 
       namespace.run(function () {
-        namespace.set('test', 'watchFile');
-        t.equal(namespace.get('test'), 'watchFile', "state has been mutated");
+        namespace.set("test", "watchFile");
+        t.equal(namespace.get("test"), "watchFile", "state has been mutated");
 
-        t.comment('starting: watchFile on ' + FILENAME);
-        fs.watchFile(FILENAME, {persistent: true, interval: 1}, function (before, after) {
-          t.comment('event: watchFile evented ' + FILENAME);
-          t.equal(namespace.get('test'), 'watchFile', "mutated state has persisted to fs.watchFile's callback");
+        t.comment("starting: watchFile on " + FILENAME);
+        fs.watchFile(FILENAME, { persistent: true, interval: 1 }, function (before, after) {
+          t.comment("event: watchFile evented " + FILENAME);
+          t.equal(
+            namespace.get("test"),
+            "watchFile",
+            "mutated state has persisted to fs.watchFile's callback",
+          );
 
           t.ok(before.ino, "file has an entry");
           t.equal(before.ino, after.ino, "file is at the same location");
@@ -922,8 +1038,8 @@ test("continuation-local state with MakeCallback and fs module", function (t) {
         });
 
         setTimeout(function poke() {
-          t.comment('poking: ' + FILENAME);
-          fs.appendFileSync(FILENAME, 'still a test');
+          t.comment("poking: " + FILENAME);
+          fs.appendFileSync(FILENAME, "still a test");
         }, 10);
       });
     });

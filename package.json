@@ -2,56 +2,42 @@
   "name": "@farmersdog/cls-hooked",
   "version": "5.0.0-alpha.1",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
-  "main": "dist/index.js",
-  "files": [
-    "dist/"
+  "keywords": [
+    "context",
+    "shared",
+    "threading"
   ],
-  "scripts": {
-    "test": "npm run test:mocha && npm run test:tap",
-    "test:mocha": "mocha --exit --require ts-node/register test/*.ts",
-    "test:tap": "tap --disable-coverage test/tap/*.tap.ts",
-    "mocha": "mocha --require ts-node/register",
-    "tap": "tap",
-    "debug": "node --nolazy --debug-brk=5858 ",
-    "compile": "tsc",
-    "lint": "eslint ."
-  },
+  "license": "BSD-2-Clause",
+  "author": "The Farmer's Dog Engineering",
   "repository": {
     "type": "git",
     "url": "https://github.com/farmersdog/cls-hooked.git"
   },
-  "keywords": [
-    "threading",
-    "shared",
-    "context"
+  "files": [
+    "dist/"
   ],
-  "author": "The Farmer's Dog Engineering",
-  "license": "BSD-2-Clause",
-  "engineStrict": false,
-  "engines": {
-    "node": "^18.0 || ^20.0 || >=22.0"
-  },
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.32.0",
-    "emitter-listener": "^1.0.1"
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "tap --disable-coverage test/tap/*.tap.ts",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepack": "npm run compile",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
   },
   "devDependencies": {
-    "@types/chai": "^5.2.2",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "^22.15.14",
-    "@types/sinon": "^17.0.4",
-    "@types/sinon-chai": "^4.0.0",
-    "@types/superagent": "^8.1.9",
-    "@types/tap": "^15.0.11",
-    "chai": "^5.2.0",
-    "eslint": "^9.26.0",
-    "mocha": "^11.2.2",
-    "semver": "^6.3.0",
-    "sinon": "^20.0.0",
-    "sinon-chai": "^4.0.0",
-    "superagent": "^10.2.1",
-    "tap": "^21.1.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
-  }
+    "@types/node": "^22.20.0",
+    "@types/superagent": "^8.1.10",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "superagent": "^10.3.0",
+    "tap": "^21.7.4",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0"
+  },
+  "engineStrict": false
 }
