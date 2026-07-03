@@ -43,6 +43,24 @@ Sequelize v6 `useCLS` patterns (byte-identical observable behavior).
    couldn't propagate implicitly either and middleware already binds
    req/res.
 
+### TypeScript declarations (drop-in for @types/cls-hooked)
+
+The package ships hand-authored type declarations (`types/index.d.ts`) shaped
+to match `@types/cls-hooked@4.3.x`, so TypeScript consumers can drop the
+`@types` package and keep compiling with zero code changes — including the
+generic `Namespace<N>` interface, namespace-qualified type access through a
+default import (`cls.Namespace`), and partial mock casts in tests. The
+declarations, not the (stricter) implementation types, are the public
+contract; compatibility is enforced by type-level tests (`npm run
+test:types`) compiled under both `bundler` and `NodeNext` module resolution.
+
+New v5 API is declared additively: `getNamespaces()` and `ERROR_SYMBOL`.
+
+One deliberate divergence is retained from `@types/cls-hooked`:
+`getNamespace()` is declared to return `Namespace | undefined`, but at
+runtime a _destroyed_ namespace returns `null` (falsy either way) — matching
+what existing code was written against.
+
 ### bindEmitter internals (emitter-listener replaced)
 
 The abandoned, untested `emitter-listener` package (and its transitive
@@ -80,7 +98,8 @@ safely bind the same emitter. Minor observable differences:
   (AsyncContextFrame-backed ALS).
 - Compiled output targets ES2022 (was ES5) — native classes and
   async/await instead of downleveled helper code.
-- Source ported to TypeScript; type declarations shipped.
+- Source ported to TypeScript; type declarations shipped (see "TypeScript
+  declarations" above — remove `@types/cls-hooked` when upgrading).
 - Package exposes the same CommonJS named exports as v4
   (`require('@farmersdog/cls-hooked').createNamespace` etc.) plus a default
   export for ESM/TS consumers.

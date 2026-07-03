@@ -30,6 +30,10 @@ package behind `bindEmitter` was replaced by an in-repo, unit-tested module
 that binds listeners when they are added instead of patching `emit` (see the
 [CHANGELOG](./CHANGELOG.md#v500) for the few observable differences).
 
+v5 ships its own TypeScript declarations, shaped to be a drop-in replacement
+for `@types/cls-hooked` — remove that package from your devDependencies when
+upgrading; no code changes are needed.
+
 ## Usage
 
 ---

@@ -1,4 +1,7 @@
 {
   "extends": "./tsconfig.json",
+  // Declarations are not generated: the hand-authored types/index.d.ts is
+  // the public type surface (shaped for @types/cls-hooked compatibility).
+  "compilerOptions": { "declaration": false },
   "include": ["index.ts", "cls-async-storage.ts", "wrap-emitter.ts"]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "5.0.0-alpha.1",
+  "version": "5.0.0-alpha.2",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
   "keywords": [
     "context",
@@ -14,14 +14,16 @@
     "url": "git+https://github.com/farmersdog/cls-hooked.git"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "types/"
   ],
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "types/index.d.ts",
   "scripts": {
     "test": "tap --disable-coverage test/tap/*.tap.ts",
+    "test:types": "tsc -p test/types/tsconfig.bundler.json && tsc -p test/types/tsconfig.nodenext.json",
     "compile": "tsc -p tsconfig.build.json",
-    "prepack": "npm run compile",
+    "prepack": "rm -rf dist && npm run compile",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt .",
