@@ -25,8 +25,8 @@ jobs:
       fail-fast: false
       matrix:
         # 22: AsyncLocalStorage backed by async_hooks internals
-        # 24: AsyncLocalStorage backed by AsyncContextFrame
-        node-version: ["22", "24"]
+        # 24+: AsyncLocalStorage backed by AsyncContextFrame
+        node-version: ["22", "24", "26"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
