@@ -53,16 +53,10 @@ class Namespace implements CLSNamespace {
   name: string;
   private _active: Context | null;
   private _set: Array<Context | null>;
-  // Parallel to _set: the AsyncLocalStorage store observed at each enter(),
-  // restored by the matching exit(). exit() must NOT restore from the sync
-  // stack (_active): when enter/exit runs inside an async continuation,
-  // _active is long since null even though the ALS frame still carries the
-  // chain's context — restoring _active would stamp `undefined` into the
-  // frame and annihilate the context for the rest of the chain. This bites
-  // hard because AsyncLocalStorage.run() short-circuits (no frame
-  // save/restore) when the requested store is already current, which is
-  // exactly what happens when bind() is invoked synchronously in the very
-  // context it captured (the context-logger idiom).
+  // Parallel to _set: the ALS store observed at each enter(), restored by
+  // the matching exit(). Restoring _active instead would wipe the frame for
+  // enter/exit pairs inside async continuations, where _active is null but
+  // the frame still carries the chain's context.
   private _enterStores: Array<Context | undefined>;
   private _storage: AsyncLocalStorage<Context | undefined>;
 

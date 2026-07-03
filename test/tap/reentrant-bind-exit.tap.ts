@@ -1,14 +1,9 @@
 "use strict";
 
-// Regression tests for exit() restoring the AsyncLocalStorage frame from the
-// sync enter/exit stack instead of the store observed at the matching
-// enter(). AsyncLocalStorage.run() short-circuits (no frame save/restore)
-// when the requested store is already current, so a bind() invoked
-// synchronously in the very context it captured relied entirely on exit()
-// putting the right value back — restoring the sync-stack value (null by
-// then, inside an async continuation) stamped `undefined` into the frame and
-// annihilated the chain's context. cls-hooked 4.x never touched async
-// propagation from exit(), so these patterns all worked there.
+// exit() must restore the ALS store observed at the matching enter(), not
+// the sync-stack value. ALS.run() skips frame save/restore when the store is
+// already current, so a bind() invoked synchronously in the context it
+// captured depends entirely on exit() restoring the right value.
 import * as tap from "tap";
 import cls from "../../index";
 
