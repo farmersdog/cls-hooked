@@ -106,6 +106,12 @@ safely bind the same emitter. Minor observable differences:
 - Test suite consolidated on `tap` (mocha/chai removed), coverage restored
   to parity with v4 and extended with differential-parity regression tests
   (`test/tap/als-parity.tap.ts`).
+- (fixed during the alpha series) `exit()` restores the
+  `AsyncLocalStorage` frame recorded at the matching `enter()` instead of
+  the sync-stack value, so a `bind()` invoked synchronously inside the very
+  context it captured (the context-logger idiom), and raw `enter()`/`exit()`
+  pairs in async continuations, no longer wipe the chain's context
+  (`test/tap/reentrant-bind-exit.tap.ts`).
 
 ### Tooling
 

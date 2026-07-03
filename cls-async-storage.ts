@@ -53,12 +53,24 @@ class Namespace implements CLSNamespace {
   name: string;
   private _active: Context | null;
   private _set: Array<Context | null>;
+  // Parallel to _set: the AsyncLocalStorage store observed at each enter(),
+  // restored by the matching exit(). exit() must NOT restore from the sync
+  // stack (_active): when enter/exit runs inside an async continuation,
+  // _active is long since null even though the ALS frame still carries the
+  // chain's context — restoring _active would stamp `undefined` into the
+  // frame and annihilate the context for the rest of the chain. This bites
+  // hard because AsyncLocalStorage.run() short-circuits (no frame
+  // save/restore) when the requested store is already current, which is
+  // exactly what happens when bind() is invoked synchronously in the very
+  // context it captured (the context-logger idiom).
+  private _enterStores: Array<Context | undefined>;
   private _storage: AsyncLocalStorage<Context | undefined>;
 
   constructor(name: string) {
     this.name = name;
     this._active = null;
     this._set = [];
+    this._enterStores = [];
     this._storage = new AsyncLocalStorage<Context | undefined>();
   }
 
@@ -239,6 +251,7 @@ class Namespace implements CLSNamespace {
     // Push the sync-stack value (not the getter): enter() may run inside
     // _storage.run() where the getter already resolves to the new context.
     this._set.push(this._active);
+    this._enterStores.push(this._storage.getStore());
     this._active = context;
     this._storage.enterWith(context);
   }
@@ -259,7 +272,7 @@ class Namespace implements CLSNamespace {
 
       const popped = this._set.pop();
       this._active = popped === undefined ? null : popped;
-      this._storage.enterWith(this._active ?? undefined);
+      this._storage.enterWith(this._enterStores.pop());
       return;
     }
 
@@ -280,6 +293,7 @@ class Namespace implements CLSNamespace {
       // Exiting a context that is not the current one: remove it from the
       // stack without touching the current frame (matches cls-hooked 4.x).
       this._set.splice(index, 1);
+      this._enterStores.splice(index, 1);
     }
   }
 
