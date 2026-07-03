@@ -22,21 +22,8 @@ replacement for v4, verified by differential testing against the v4
 implementation (including end-to-end express middleware and Sequelize v6
 `useCLS` flows). Node ≥ 22 is required.
 
-Deliberate behavior changes, all fixes of v4 context leaks — see the
-[CHANGELOG](./CHANGELOG.md#v500) for details:
-
-1. `await ns.runPromise(...)` no longer leaks the inner context into the
-   awaiting chain after settlement.
-2. `ns.active` is `null` (not a dead context) after `runPromise` settles.
-3. A synchronous throw inside `runPromise`'s fn exits the context instead of
-   corrupting the context stack.
-
-One known propagation divergence: events fired directly from C++ I/O on
-resources created _inside_ a context (e.g. raw `'data'` listeners on an
-inbound server socket, where the _server_ was created inside `ns.run()`) no
-longer inherit that context implicitly — use `ns.bindEmitter(socket)`, which
-has always been the documented pattern for emitters. Standard express /
-Sequelize usage is unaffected.
+There are a few deliberate behavior changes, all of which address v4 context leaks.
+See the [CHANGELOG](./CHANGELOG.md#v500) for details.
 
 v5 also has **zero runtime dependencies**: the abandoned `emitter-listener`
 package behind `bindEmitter` was replaced by an in-repo, unit-tested module
