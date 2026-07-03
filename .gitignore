@@ -3,3 +3,5 @@ node_modules/
 !.idea/runConfigurations/
 npm-debug.log
 .vscode
+.tap/
+dist/

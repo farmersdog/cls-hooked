@@ -2,11 +2,42 @@
 
 This is a maintained fork of the [Jeff-Lewis/cls-hooked](https://github.com/Jeff-Lewis/cls-hooked) package. The
 public API will be left unchanged so this can continue to be used by any
-package that depends on the continuation-local-stroage implementation.
+package that depends on the continuation-local-storage implementation.
+
+## v5: AsyncLocalStorage internals
+
+As of v5, the internals are built on Node's stable
+[`AsyncLocalStorage`](https://nodejs.org/api/async_context.html) instead of
+the unstable, unmaintained `async_hooks` API. The public API is a drop-in
+replacement for v4, verified by differential testing against the v4
+implementation (including end-to-end express middleware and Sequelize v6
+`useCLS` flows). Node ≥ 22 is required.
+
+Deliberate behavior changes, all fixes of v4 context leaks — see the
+[CHANGELOG](./CHANGELOG.md#v500) for details:
+
+1. `await ns.runPromise(...)` no longer leaks the inner context into the
+   awaiting chain after settlement.
+2. `ns.active` is `null` (not a dead context) after `runPromise` settles.
+3. A synchronous throw inside `runPromise`'s fn exits the context instead of
+   corrupting the context stack.
+
+One known propagation divergence: events fired directly from C++ I/O on
+resources created _inside_ a context (e.g. raw `'data'` listeners on an
+inbound server socket, where the _server_ was created inside `ns.run()`) no
+longer inherit that context implicitly — use `ns.bindEmitter(socket)`, which
+has always been the documented pattern for emitters. Standard express /
+Sequelize usage is unaffected.
+
+v5 also has **zero runtime dependencies**: the abandoned `emitter-listener`
+package behind `bindEmitter` was replaced by an in-repo, unit-tested module
+that binds listeners when they are added instead of patching `emit` (see the
+[CHANGELOG](./CHANGELOG.md#v500) for the few observable differences).
 
 ## Usage
 
 ---
+
 Continuation-local storage works like thread-local storage in threaded
 programming, but is based on chains of Node-style callbacks instead of threads.
 The standard Node convention of functions calling functions is very similar to
@@ -20,16 +51,16 @@ before calling a function passed in by a user to continue execution:
 ```javascript
 // setup.js
 
-var createNamespace = require('cls-hooked').createNamespace;
-var session = createNamespace('my session');
+var createNamespace = require("cls-hooked").createNamespace;
+var session = createNamespace("my session");
 
-var db = require('./lib/db.js');
+var db = require("./lib/db.js");
 
 function start(options, next) {
   db.fetchUserById(options.id, function (error, user) {
     if (error) return next(error);
 
-    session.set('user', user);
+    session.set("user", user);
 
     next();
   });
@@ -43,14 +74,14 @@ the value you set earlier:
 ```javascript
 // send_response.js
 
-var getNamespace = require('cls-hooked').getNamespace;
-var session = getNamespace('my session');
+var getNamespace = require("cls-hooked").getNamespace;
+var session = getNamespace("my session");
 
-var render = require('./lib/render.js')
+var render = require("./lib/render.js");
 
 function finish(response) {
-  var user = session.get('user');
-  render({user: user}).pipe(response);
+  var user = session.get("user");
+  render({ user: user }).pipe(response);
 }
 ```
 
@@ -79,30 +110,30 @@ overwriting the parent's.
 A simple, annotated example of how this nesting behaves:
 
 ```javascript
-var createNamespace = require('cls-hooked').createNamespace;
+var createNamespace = require("cls-hooked").createNamespace;
 
-var writer = createNamespace('writer');
+var writer = createNamespace("writer");
 writer.run(function () {
-  writer.set('value', 0);
+  writer.set("value", 0);
 
   requestHandler();
 });
 
 function requestHandler() {
-  writer.run(function(outer) {
+  writer.run(function (outer) {
     // writer.get('value') returns 0
     // outer.value is 0
-    writer.set('value', 1);
+    writer.set("value", 1);
     // writer.get('value') returns 1
     // outer.value is 1
-    process.nextTick(function() {
+    process.nextTick(function () {
       // writer.get('value') returns 1
       // outer.value is 1
-      writer.run(function(inner) {
+      writer.run(function (inner) {
         // writer.get('value') returns 1
         // outer.value is 1
         // inner.value is 1
-        writer.set('value', 2);
+        writer.set("value", 2);
         // writer.get('value') returns 2
         // outer.value is 1
         // inner.value is 2
@@ -110,16 +141,16 @@ function requestHandler() {
     });
   });
 
-  setTimeout(function() {
+  setTimeout(function () {
     // runs with the default context, because nested contexts have ended
-    console.log(writer.get('value')); // prints 0
+    console.log(writer.get("value")); // prints 0
   }, 1000);
 }
 ```
 
 ## cls.createNamespace(name)
 
-* return: {Namespace}
+- return: {Namespace}
 
 Each application wanting to use continuation-local values should create its own
 namespace. Reading from (or, more significantly, writing to) namespaces that
@@ -127,7 +158,7 @@ don't belong to you is a faux pas.
 
 ## cls.getNamespace(name)
 
-* return: {Namespace}
+- return: {Namespace}
 
 Look up an existing namespace.
 
@@ -145,15 +176,14 @@ remaining references to those namespaces in code, the associated storage will
 still be reachable, even though the associated state is no longer being updated.
 Make sure you clean up any references to destroyed namespaces yourself.
 
-## process.namespaces
+## cls.getNamespaces()
 
-* return: dictionary of {Namespace} objects
+- return: dictionary of {Namespace} objects
 
-Continuation-local storage has a performance cost, and so it isn't enabled
-until the module is loaded for the first time. Once the module is loaded, the
-current set of namespaces is available in `process.namespaces`, so library code
-that wants to use continuation-local storage only when it's active should test
-for the existence of `process.namespaces`.
+Returns the registry of all namespaces, keyed by name (`null` marks a
+destroyed namespace). Before v5 this registry lived on `process.namespaces`,
+which leaked namespaces across module-registry resets in test runners and
+across coexisting copies of the library; it is now module-local.
 
 ## Class: Namespace
 
@@ -163,18 +193,18 @@ whose calls originate from a callback passed to `namespace.run()` or
 
 ### namespace.active
 
-* return: the currently active context on a namespace
+- return: the currently active context on a namespace
 
 ### namespace.set(key, value)
 
-* return: `value`
+- return: `value`
 
 Set a value on the current continuation context. Must be set within an active
 continuation chain started with `namespace.run()` or `namespace.bind()`.
 
 ### namespace.get(key)
 
-* return: the requested value, or `undefined`
+- return: the requested value, or `undefined`
 
 Look up a value on the current continuation context. Recursively searches from
 the innermost to outermost nested continuation context for a value associated
@@ -183,7 +213,7 @@ with a given key. Must be set within an active continuation chain started with
 
 ### namespace.run(callback)
 
-* return: the context associated with that callback
+- return: the context associated with that callback
 
 Create a new context on which values can be set or read. Run all the functions
 that are called (either directly, or indirectly through asynchronous functions
@@ -193,7 +223,7 @@ when it's called.
 
 ### namespace.runAndReturn(callback)
 
-* return: the return value of the callback
+- return: the return value of the callback
 
 Create a new context on which values can be set or read. Run all the functions
 that are called (either directly, or indirectly through asynchronous functions
@@ -206,7 +236,7 @@ than the context.
 
 ### namespace.bind(callback, [context])
 
-* return: a callback wrapped up in a context closure
+- return: a callback wrapped up in a context closure
 
 Bind a function to the specified namespace. Works analogously to
 `Function.bind()` or `domain.bind()`. If context is omitted, it will default to
@@ -235,7 +265,7 @@ http.createServer(function (req, res) {
 
 ### namespace.createContext()
 
-* return: a context cloned from the currently active context
+- return: a context cloned from the currently active context
 
 Use this with `namespace.bind()`, if you want to have a fresh context at invocation time,
 as opposed to binding time:
@@ -251,7 +281,7 @@ function bindLater(callback) {
 
 setInterval(function () {
   var bound = bindLater(doSomething);
-  bound('test');
+  bound("test");
 }, 100);
 ```
 

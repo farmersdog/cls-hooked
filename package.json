@@ -1,45 +1,43 @@
 {
   "name": "@farmersdog/cls-hooked",
-  "version": "4.5.0",
+  "version": "5.0.0-alpha.1",
   "description": "Fork of the cls-hooked package, maintained by The Farmer's Dog Engineering",
-  "main": "index.js",
-  "files": [
-    "index.js",
-    "context.js",
-    "context-legacy.js"
+  "keywords": [
+    "context",
+    "shared",
+    "threading"
   ],
-  "scripts": {
-    "test": "mocha test/*.js & tap test/tap/*.tap.js",
-    "test-mocha": "mocha test/*.js",
-    "test-tap": "tap test/tap/*.tap.js",
-    "debug": "node --nolazy --debug-brk=5858 "
-  },
+  "license": "BSD-2-Clause",
+  "author": "The Farmer's Dog Engineering",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/farmersdog/cls-hooked.git"
   },
-  "keywords": [
-    "threading",
-    "shared",
-    "context"
+  "files": [
+    "dist/"
   ],
-  "author": "The Farmer's Dog Engineering",
-  "license": "BSD-2-Clause",
-  "engineStrict": false,
-  "engines": {
-    "node": "^4.7 || >=6.9 || >=7.3 || >=8.2.1"
-  },
-  "dependencies": {
-    "async-hook-jl": "^1.7.6",
-    "emitter-listener": "^1.0.1"
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "tap --disable-coverage test/tap/*.tap.ts",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepack": "npm run compile",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
   },
   "devDependencies": {
-    "chai": "^4.1.0",
-    "mocha": "^6.2.2",
-    "semver": "^6.3.0",
-    "sinon": "^7.5.0",
-    "sinon-chai": "^3.3.0",
-    "superagent": "^5.1.2",
-    "tap": "^10.7.3"
-  }
+    "@types/node": "^22.20.0",
+    "@types/superagent": "^8.1.10",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "superagent": "^10.3.0",
+    "tap": "^21.7.4",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.0"
+  },
+  "engineStrict": false
 }

@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc", "unicorn"],
+  "ignorePatterns": ["dist/**", ".tap/**"],
+  "rules": {
+    "typescript/no-this-alias": "off"
+  }
+}
