@@ -52,6 +52,8 @@ jobs:
         run: npm ci
       - name: Compile
         run: npm run compile
+      - name: Type declaration compatibility
+        run: npm run test:types
       - name: Verify CommonJS drop-in interface
         run: |
           node -e "

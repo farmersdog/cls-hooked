@@ -11,7 +11,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "sourceMap": true
+    "sourceMap": true,
+    // Resolve the package self-import in test/types to the hand-authored
+    // public declarations (the shipped `types` entry).
+    "paths": { "cls-hooked": ["./types/index.d.ts"] }
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
