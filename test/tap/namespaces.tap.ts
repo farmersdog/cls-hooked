@@ -22,14 +22,14 @@ test("namespace management", function (t) {
     cls.reset();
   }, "allows resetting namespaces");
 
-  t.equal(Object.keys(process.namespaces).length, 0, "namespaces have been reset");
+  t.equal(Object.keys(cls.getNamespaces()).length, 0, "namespaces have been reset");
 
   cls.createNamespace("another");
-  t.ok(process.namespaces.another, "namespace is available from global");
+  t.ok(cls.getNamespaces().another, "namespace is available from global");
 
   t.doesNotThrow(function () {
     cls.destroyNamespace("another");
   }, "destroying works");
 
-  t.notOk(process.namespaces.another, "namespace has been removed");
+  t.notOk(cls.getNamespaces().another, "namespace has been removed");
 });

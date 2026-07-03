@@ -4,6 +4,7 @@
 export {
   createNamespace,
   getNamespace,
+  getNamespaces,
   destroyNamespace,
   reset,
   ERROR_SYMBOL,

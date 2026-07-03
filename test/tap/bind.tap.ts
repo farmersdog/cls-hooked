@@ -39,7 +39,7 @@ test("simple tracer built on contexts", function (t) {
   harvester.on("finished", function (transaction: Transaction) {
     t.ok(transaction, "transaction should have been passed in");
     t.equal(transaction.status, "ok", "transaction should have finished OK");
-    t.equal(Object.keys(process.namespaces).length, 1, "Should only have one namespace.");
+    t.equal(Object.keys(cls.getNamespaces()).length, 1, "Should only have one namespace.");
   });
 
   trace.runHandler(function inScope() {

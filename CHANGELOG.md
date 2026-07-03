@@ -23,7 +23,17 @@ Sequelize v6 `useCLS` patterns (byte-identical observable behavior).
 3. **A synchronous throw inside `runPromise`'s fn now exits the context**
    before the exception propagates; v4 left the context stack permanently
    corrupted.
-4. **Known divergence — C++-triggered events on resources created inside a
+4. **The namespace registry is module-local instead of `process.namespaces`.**
+   Storing it on `process` leaked namespaces across module-registry resets in
+   test runners (e.g. a namespace registered by setup code survived into
+   later Jest test environments) and shared namespaces by name across
+   coexisting copies/versions of the library, mixing incompatible
+   implementations. Node's module cache still makes the registry a
+   process-wide singleton for a normally deduped install, so
+   `createNamespace`/`getNamespace` behave identically there. The registry is
+   readable via the new `getNamespaces()` export; the global
+   `NodeJS.Process` type augmentation is gone from the shipped declarations.
+5. **Known divergence — C++-triggered events on resources created inside a
    context**: an inbound server socket created in the C++ accept path does
    not inherit the context that was active when the _server_ was created,
    so its raw `'data'`-style listeners need `ns.bindEmitter(socket)`.

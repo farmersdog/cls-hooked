@@ -10,18 +10,11 @@ const CONTEXTS_SYMBOL = "cls@contexts";
 
 type Context = Record<string | symbol, any>;
 
-// Declare the namespace property on process
-declare global {
-  namespace NodeJS {
-    interface Process {
-      namespaces: Record<string, Namespace | null>;
-    }
-  }
-}
-
-// Initialize the namespaces object if it doesn't exist.
-// Shared registry — coexists with other copies/versions of cls-hooked.
-process.namespaces = process.namespaces || Object.create(null);
+// Module-local registry (v4 stored this on `process.namespaces`, which leaked
+// namespaces across module-registry resets in test runners and across
+// coexisting copies of the library). Node's module cache still makes this a
+// process-wide singleton for everyone resolving to the same copy.
+const namespaces: Record<string, Namespace | null> = Object.create(null);
 
 interface CLSNamespace {
   name: string;
@@ -374,7 +367,7 @@ export function createNamespace(name: string): Namespace {
   }
 
   const namespace = new Namespace(name);
-  process.namespaces[name] = namespace;
+  namespaces[name] = namespace;
   return namespace;
 }
 
@@ -383,7 +376,15 @@ export function createNamespace(name: string): Namespace {
  */
 export function getNamespace(name: string): Namespace | null | undefined {
   // undefined for never-created, null for destroyed — same as cls-hooked 4.x
-  return process.namespaces[name];
+  return namespaces[name];
+}
+
+/**
+ * Get the registry of all namespaces (keyed by name; null = destroyed).
+ * v4 exposed this as `process.namespaces`.
+ */
+export function getNamespaces(): Record<string, Namespace | null> {
+  return namespaces;
 }
 
 /**
@@ -397,21 +398,19 @@ export function destroyNamespace(name: string): void {
   }
 
   namespace.disableStorage();
-  process.namespaces[name] = null;
+  namespaces[name] = null;
 }
 
 /**
  * Reset all namespaces
  */
 export function reset(): void {
-  if (process.namespaces) {
-    Object.keys(process.namespaces).forEach((name) => {
-      if (process.namespaces[name]) {
-        destroyNamespace(name);
-      }
-    });
-  }
-  process.namespaces = Object.create(null);
+  Object.keys(namespaces).forEach((name) => {
+    if (namespaces[name]) {
+      destroyNamespace(name);
+    }
+    delete namespaces[name];
+  });
 }
 
 export { ERROR_SYMBOL };
@@ -421,6 +420,7 @@ export type { CLSNamespace, Context };
 const clsHooked = {
   createNamespace,
   getNamespace,
+  getNamespaces,
   destroyNamespace,
   reset,
   ERROR_SYMBOL,

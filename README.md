@@ -176,15 +176,14 @@ remaining references to those namespaces in code, the associated storage will
 still be reachable, even though the associated state is no longer being updated.
 Make sure you clean up any references to destroyed namespaces yourself.
 
-## process.namespaces
+## cls.getNamespaces()
 
 - return: dictionary of {Namespace} objects
 
-Continuation-local storage has a performance cost, and so it isn't enabled
-until the module is loaded for the first time. Once the module is loaded, the
-current set of namespaces is available in `process.namespaces`, so library code
-that wants to use continuation-local storage only when it's active should test
-for the existence of `process.namespaces`.
+Returns the registry of all namespaces, keyed by name (`null` marks a
+destroyed namespace). Before v5 this registry lived on `process.namespaces`,
+which leaked namespaces across module-registry resets in test runners and
+across coexisting copies of the library; it is now module-local.
 
 ## Class: Namespace
 
