@@ -4,6 +4,15 @@ This is a maintained fork of the [Jeff-Lewis/cls-hooked](https://github.com/Jeff
 public API will be left unchanged so this can continue to be used by any
 package that depends on the continuation-local-storage implementation.
 
+## Do not use this in new projects
+
+New code should use Node's built-in
+[`AsyncLocalStorage`](https://nodejs.org/api/async_context.html) directly —
+it is stable, well-maintained, and covers everything this package does. The
+only reason to use this package is a legacy/brownfield codebase that already
+depends on the CLS API (directly, or through a dependency such as Sequelize
+v6's `useCLS`) and can't remove that dependency for one reason or another.
+
 ## v5: AsyncLocalStorage internals
 
 As of v5, the internals are built on Node's stable
